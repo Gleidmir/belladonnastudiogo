@@ -411,32 +411,27 @@ export function LandingPage() {
 
       {/* HERO */}
       <section id="hero" className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(245,158,11,0.08),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(245,158,11,0.08),transparent_50%)]" />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div>
-              <span className="inline-flex items-center rounded-full bg-zinc-900 px-3 py-1 text-xs font-bold text-amber-400 ring-1 ring-amber-500/20">
-                🔥 OFERTA DE LANÇAMENTO: 30 DIAS GRÁTIS
-              </span>
-              <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.05] tracking-tight">
-                Sua Barbearia no <span className="text-amber-400">Piloto Automático</span>.
-                O Controle Total do Seu Faturamento na Palma da Mão.
-              </h1>
-              <p className="mt-6 text-base sm:text-lg text-zinc-400 leading-relaxed max-w-xl">
-                Elimine o caos das mensagens de WhatsApp. Deixe que o{" "}
-                <span className="font-semibold text-white">BarberPass</span> agende seus clientes
-                sozinhos enquanto você lucra mais e monitora tudo em tempo real.
-              </p>
+          <div className="flex flex-col items-center text-center">
+            <span className="inline-flex items-center rounded-full bg-zinc-900 px-3 py-1 text-xs font-bold text-amber-400 ring-1 ring-amber-500/20">
+              🔥 OFERTA DE LANÇAMENTO: 30 DIAS GRÁTIS
+            </span>
+            <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.05] tracking-tight max-w-4xl">
+              Sua Barbearia no <span className="text-amber-400">Piloto Automático</span>.
+              O Controle Total do Seu Faturamento na Palma da Mão.
+            </h1>
+            <p className="mt-6 text-base sm:text-lg text-zinc-400 leading-relaxed max-w-2xl">
+              Elimine o caos das mensagens de WhatsApp. Deixe que o{" "}
+              <span className="font-semibold text-white">BarberPass</span> agende seus clientes
+              sozinhos enquanto você lucra mais e monitora tudo em tempo real.
+            </p>
 
-              <div className="mt-8 max-w-md">
-                <SignupCard />
-              </div>
+            <div className="mt-8 w-full max-w-md">
+              <SignupCard />
             </div>
 
-            <div className="hidden lg:flex justify-center">
-              <PhoneMockup />
-            </div>
-            <div className="lg:hidden">
+            <div className="mt-12 flex justify-center">
               <PhoneMockup />
             </div>
           </div>
