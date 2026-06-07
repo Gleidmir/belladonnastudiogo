@@ -605,17 +605,20 @@ export function LandingPage() {
 
       {/* Floating WhatsApp */}
       <a
-        href="https://wa.me/5500000000000"
+        href="https://wa.me/5562993299120"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Falar no WhatsApp"
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-2xl shadow-green-600/40 ring-4 ring-green-600/20 hover:bg-green-500 hover:scale-105 transition-all"
+        className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-1 rounded-2xl bg-green-600 px-3 py-2 text-white shadow-2xl shadow-green-600/40 ring-4 ring-green-600/20 hover:bg-green-500 hover:scale-105 transition-all"
       >
-        <WhatsAppIcon className="h-7 w-7" />
-        <span className="absolute -top-1 -right-1 flex h-3 w-3">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-          <span className="relative inline-flex h-3 w-3 rounded-full bg-green-400" />
-        </span>
+        <div className="relative flex h-10 w-10 items-center justify-center">
+          <WhatsAppIcon className="h-7 w-7" />
+          <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-400" />
+          </span>
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-wider">SUPORTE</span>
       </a>
     </div>
   );
