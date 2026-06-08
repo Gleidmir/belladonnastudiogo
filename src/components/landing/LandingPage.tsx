@@ -363,7 +363,7 @@ export function LandingPage() {
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <Link
               to="/login"
-              className="rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-bold text-zinc-100 hover:text-amber-400 hover:border-amber-500 hover:bg-zinc-800 transition-all whitespace-nowrap"
+              className="rounded-lg border border-amber-500 bg-zinc-950 px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-bold text-amber-400 hover:text-zinc-950 hover:bg-amber-500 transition-all whitespace-nowrap"
             >
               Entrar
             </Link>
