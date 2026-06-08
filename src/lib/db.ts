@@ -654,9 +654,25 @@ export const logout = () => {
   toast.info("Sessão encerrada.");
 };
 
-export const resetLocalDB = () => {
+export const resetLocalDB = async () => {
   if (isServer) return;
   const tenantId = getCurrentTenantId();
+
+  if (isSupabaseConfigured) {
+    try {
+      // Deleta agendamentos finalizados ou cancelados no Supabase
+      const { error } = await supabase
+        .from("appointments")
+        .delete()
+        .neq("status", "pending");
+      if (error) throw error;
+    } catch (e) {
+      console.error("Erro ao ler/limpar agendamentos no Supabase no reset:", e);
+      toast.error("Erro ao sincronizar reset com o servidor.");
+      return;
+    }
+  }
+
   const appointmentsKey = `mbg_appointments_${tenantId}`;
   const appointmentsStr = window.localStorage.getItem(appointmentsKey);
   if (appointmentsStr) {

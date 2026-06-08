@@ -352,7 +352,7 @@ export function LandingPage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white antialiased">
       {/* Nav */}
-      <header className="border-b border-zinc-900 bg-zinc-950/90 backdrop-blur sticky top-0 z-40 pt-[calc(14px+env(safe-area-inset-top,0px))] pb-3">
+      <header className="border-b border-zinc-900 bg-zinc-950 sticky top-0 z-40 pt-[calc(28px+env(safe-area-inset-top,0px))] sm:pt-3 pb-3">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-3 sm:px-6">
           <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
             <BarberGoLogo className="w-6 h-6 sm:w-8 h-8 shrink-0" />
@@ -363,13 +363,13 @@ export function LandingPage() {
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <Link
               to="/login"
-              className="rounded-lg border border-zinc-800 px-2 sm:px-3 py-1 sm:py-1.5 text-[9px] sm:text-xs md:text-sm font-bold text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors whitespace-nowrap"
+              className="rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-bold text-zinc-100 hover:text-amber-400 hover:border-amber-500 hover:bg-zinc-800 transition-all whitespace-nowrap"
             >
               Entrar
             </Link>
             <Link
               to="/login"
-              className="rounded-lg bg-amber-500 px-2 sm:px-3 py-1 sm:py-1.5 text-[9px] sm:text-xs md:text-sm font-bold text-zinc-950 hover:bg-amber-400 transition-colors whitespace-nowrap"
+              className="rounded-lg bg-amber-500 px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-bold text-zinc-950 hover:bg-amber-400 transition-all whitespace-nowrap"
             >
               Teste Grátis
             </Link>

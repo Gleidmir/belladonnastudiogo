@@ -182,9 +182,9 @@ function AdminDashboard() {
     navigate({ to: "/" });
   };
 
-  const handleResetData = () => {
+  const handleResetData = async () => {
     if (confirm("ATENÇÃO: Isso irá apagar todo o faturamento acumulado e os agendamentos finalizados ou cancelados. Os barbeiros, clientes cadastrados e serviços serão preservados. Deseja continuar?")) {
-      resetLocalDB();
+      await resetLocalDB();
       setTimeout(() => {
         window.location.reload();
       }, 800);
@@ -458,8 +458,8 @@ function AdminDashboard() {
       )}
 
       {/* Top Header */}
-      <header className="border-b border-zinc-900 bg-zinc-900/40 backdrop-blur sticky top-0 z-40">
-        <div className="mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 py-4">
+      <header className="border-b border-zinc-900 bg-zinc-950 sticky top-0 z-40 pt-[calc(28px+env(safe-area-inset-top,0px))] sm:pt-4 pb-3">
+        <div className="mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3 min-w-0">
             <BarberGoLogo className="w-10 h-10 shrink-0" />
             <div className="min-w-0">

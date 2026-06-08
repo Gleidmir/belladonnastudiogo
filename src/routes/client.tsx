@@ -75,9 +75,9 @@ function ClientDashboard() {
     navigate({ to: "/" });
   };
 
-  const handleResetData = () => {
+  const handleResetData = async () => {
     if (confirm("ATENÇÃO: Isso irá apagar todos os seus agendamentos finalizados ou cancelados e histórico. O cadastro de barbeiros e serviços será preservado. Deseja continuar?")) {
-      resetLocalDB();
+      await resetLocalDB();
       setTimeout(() => {
         window.location.reload();
       }, 800);
@@ -95,8 +95,8 @@ function ClientDashboard() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white antialiased flex flex-col justify-between">
       {/* Top Navbar */}
-      <header className="border-b border-zinc-900 bg-zinc-950/80 backdrop-blur sticky top-0 z-40">
-        <div className="mx-auto max-w-lg flex items-center justify-between px-4 py-3">
+      <header className="border-b border-zinc-900 bg-zinc-950 sticky top-0 z-40 pt-[calc(28px+env(safe-area-inset-top,0px))] sm:pt-3 pb-3">
+        <div className="mx-auto max-w-lg flex items-center justify-between px-4">
           <div className="flex items-center gap-2.5">
             <BarberGoLogo className="w-8 h-8" />
             <span className="text-sm font-extrabold tracking-tight">Meu Barbeiro <span className="text-amber-500">GO</span></span>
