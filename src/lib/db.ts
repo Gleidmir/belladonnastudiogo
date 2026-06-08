@@ -468,6 +468,52 @@ export const addClient = async (name: string, phone: string, email?: string): Pr
   return newClient;
 };
 
+export const updateClient = async (updatedClient: Client): Promise<void> => {
+  if (isSupabaseConfigured) {
+    try {
+      const { error } = await supabase
+        .from("clients")
+        .update({
+          name: updatedClient.name,
+          phone: updatedClient.phone,
+          email: updatedClient.email,
+        })
+        .eq("id", updatedClient.id);
+      if (error) throw error;
+      toast.success("Cliente atualizado no servidor!");
+      return;
+    } catch (e) {
+      console.error("Erro ao atualizar cliente no Supabase:", e);
+    }
+  }
+
+  const clients = await getClients();
+  const index = clients.findIndex((c) => c.id === updatedClient.id);
+  if (index !== -1) {
+    clients[index] = updatedClient;
+    setStorageItem("mbg_clients", clients);
+    toast.success("Cliente atualizado localmente!");
+  }
+};
+
+export const deleteClient = async (id: string): Promise<void> => {
+  if (isSupabaseConfigured) {
+    try {
+      const { error } = await supabase.from("clients").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Cliente excluído no servidor!");
+      return;
+    } catch (e) {
+      console.error("Erro ao excluir cliente no Supabase:", e);
+    }
+  }
+
+  const clients = await getClients();
+  const filtered = clients.filter((c) => c.id !== id);
+  setStorageItem("mbg_clients", filtered);
+  toast.success("Cliente excluído localmente!");
+};
+
 // --- APPOINTMENTS ---
 export const getAppointments = async (): Promise<Appointment[]> => {
   if (isSupabaseConfigured) {

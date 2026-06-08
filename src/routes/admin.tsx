@@ -55,6 +55,9 @@ import {
   deleteBarber,
   Barber,
   resetLocalDB,
+  addClient,
+  updateClient,
+  deleteClient,
 } from "../lib/db";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
@@ -125,6 +128,13 @@ function AdminDashboard() {
   const [barberStartTime, setBarberStartTime] = useState("08:00");
   const [barberEndTime, setBarberEndTime] = useState("19:00");
   const [barberBlockedDates, setBarberBlockedDates] = useState("");
+
+  // Edit/Add client form state
+  const [showClientForm, setShowClientForm] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [clientName, setClientName] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
 
   // Load session and data
   useEffect(() => {
@@ -361,6 +371,67 @@ function AdminDashboard() {
       setLoading(true);
       try {
         await deleteBarber(id);
+        await loadAllData();
+      } catch (e) {
+        console.error(e);
+        setLoading(false);
+      }
+    }
+  };
+
+  // Client Actions
+  const handleClientSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!clientName.trim() || !clientPhone.trim()) {
+      toast.error("Por favor, preencha o nome e o celular do cliente.");
+      return;
+    }
+
+    const cleanPhone = clientPhone.replace(/\D/g, "");
+    if (cleanPhone.length < 10) {
+      toast.error("Por favor, preencha um número de celular válido com DDD.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (editingClient) {
+        await updateClient({
+          ...editingClient,
+          name: clientName,
+          phone: cleanPhone,
+          email: clientEmail.trim() || undefined,
+        });
+        setEditingClient(null);
+      } else {
+        await addClient(clientName, cleanPhone, clientEmail.trim() || undefined);
+      }
+
+      // Reset Form
+      setClientName("");
+      setClientPhone("");
+      setClientEmail("");
+      setShowClientForm(false);
+      await loadAllData();
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
+    }
+  };
+
+  const handleEditClientClick = (cli: Client) => {
+    setEditingClient(cli);
+    setClientName(cli.name);
+    setClientPhone(cli.phone);
+    setClientEmail(cli.email || "");
+    setShowClientForm(true);
+  };
+
+  const handleDeleteClientClick = async (id: string) => {
+    if (confirm("Tem certeza que deseja excluir este cliente do cadastro?")) {
+      setLoading(true);
+      try {
+        await deleteClient(id);
         await loadAllData();
       } catch (e) {
         console.error(e);
@@ -770,18 +841,106 @@ function AdminDashboard() {
                   <p className="text-[11px] text-zinc-500 mt-0.5">Veja a lista de clientes cadastrados no sistema.</p>
                 </div>
 
-                {/* Search Bar */}
-                <div className="relative w-full sm:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
-                  <input
-                    type="text"
-                    value={clientSearch}
-                    onChange={(e) => setClientSearch(e.target.value)}
-                    placeholder="Pesquisar por nome ou celular"
-                    className="w-full rounded-xl bg-zinc-950/90 pl-9 pr-4 py-2.5 text-xs text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all"
-                  />
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                  {!showClientForm && (
+                    <button
+                      onClick={() => {
+                        setEditingClient(null);
+                        setClientName("");
+                        setClientPhone("");
+                        setClientEmail("");
+                        setShowClientForm(true);
+                      }}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold transition-all shadow shadow-amber-500/10 cursor-pointer"
+                    >
+                      <Plus className="h-4 w-4" /> Novo Cliente
+                    </button>
+                  )}
+
+                  {/* Search Bar */}
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
+                    <input
+                      type="text"
+                      value={clientSearch}
+                      onChange={(e) => setClientSearch(e.target.value)}
+                      placeholder="Pesquisar por nome ou celular"
+                      className="w-full rounded-xl bg-zinc-950/90 pl-9 pr-4 py-2.5 text-xs text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all"
+                    />
+                  </div>
                 </div>
               </div>
+
+              {/* Client Creator/Editor Form */}
+              {showClientForm && (
+                <form
+                  onSubmit={handleClientSubmit}
+                  className="bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl p-5 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200"
+                >
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                    {editingClient ? "Editar Cliente" : "Cadastrar Novo Cliente"}
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Nome do Cliente</label>
+                      <input
+                        type="text"
+                        required
+                        value={clientName}
+                        onChange={(e) => setClientName(e.target.value)}
+                        placeholder="Ex: João da Silva"
+                        className="w-full rounded-xl bg-zinc-950 mt-1.5 px-4 py-3 text-xs text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Celular (WhatsApp - com DDD)</label>
+                      <input
+                        type="text"
+                        required
+                        value={clientPhone}
+                        onChange={(e) => setClientPhone(e.target.value)}
+                        placeholder="Ex: (62) 99329-9120"
+                        className="w-full rounded-xl bg-zinc-950 mt-1.5 px-4 py-3 text-xs text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">E-mail (Opcional)</label>
+                      <input
+                        type="email"
+                        value={clientEmail}
+                        onChange={(e) => setClientEmail(e.target.value)}
+                        placeholder="Ex: joao@gmail.com"
+                        className="w-full rounded-xl bg-zinc-950 mt-1.5 px-4 py-3 text-xs text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowClientForm(false);
+                        setEditingClient(null);
+                        setClientName("");
+                        setClientPhone("");
+                        setClientEmail("");
+                      }}
+                      className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-xs font-bold text-zinc-400 hover:text-white transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 px-6 py-2.5 text-xs font-bold transition-all shadow"
+                    >
+                      {editingClient ? "Salvar Alterações" : "Adicionar Cliente"}
+                    </button>
+                  </div>
+                </form>
+              )}
 
               {/* Clients Table */}
               <div className="bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl overflow-hidden">
@@ -792,7 +951,7 @@ function AdminDashboard() {
                         <th className="p-4">Cliente</th>
                         <th className="p-4">Celular (WhatsApp)</th>
                         <th className="p-4">Cadastrado em</th>
-                        <th className="p-4 text-right">Ação</th>
+                        <th className="p-4 text-right">Ações</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800">
@@ -818,14 +977,30 @@ function AdminDashboard() {
                             {new Date(client.registeredAt).toLocaleDateString("pt-BR")}
                           </td>
                           <td className="p-4 text-right">
-                            <a
-                              href={`https://wa.me/55${client.phone}?text=Ol%C3%A1%20${encodeURIComponent(client.name)}!%20Tudo%20bem%3F%20Entramos%20em%20contato%20pela%20Barbearia.`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-[10px] font-bold text-zinc-400 hover:text-white hover:border-zinc-700 transition-all"
-                            >
-                              Enviar Mensagem
-                            </a>
+                            <div className="flex items-center justify-end gap-2">
+                              <a
+                                href={`https://wa.me/55${client.phone}?text=Ol%C3%A1%20${encodeURIComponent(client.name)}!%20Tudo%20bem%3F%20Entramos%20em%20contato%20pela%20Barbearia.`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-[10px] font-bold text-zinc-400 hover:text-white hover:border-zinc-700 transition-all"
+                              >
+                                Mensagem
+                              </a>
+                              <button
+                                onClick={() => handleEditClientClick(client)}
+                                className="p-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-500 hover:text-amber-500 hover:border-amber-500/30 transition-colors cursor-pointer"
+                                title="Editar"
+                              >
+                                <Edit2 className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteClientClick(client.id)}
+                                className="p-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-500 hover:text-red-500 hover:border-red-500/30 transition-colors cursor-pointer"
+                                title="Excluir"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
