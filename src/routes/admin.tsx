@@ -408,7 +408,14 @@ function AdminDashboard() {
   );
 
   // Filters for agenda list
-  const todayStr = mounted ? new Date().toISOString().split("T")[0] : "";
+  const getLocalTodayStr = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+  const todayStr = mounted ? getLocalTodayStr() : "";
   const filteredAppointments = appointments.filter((apt) => {
     if (agendaFilter === "all") return true;
     return apt.status === agendaFilter;

@@ -243,7 +243,10 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
       const dayName = dayNames[d.getDay()];
       const dayNum = String(d.getDate()).padStart(2, "0");
       const monthNum = String(d.getMonth() + 1).padStart(2, "0");
-      const dateStr = d.toISOString().split("T")[0];
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
 
       // Check if selected barber works this day
       const dayOfWeek = d.getDay();
