@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "../../lib/supabase";
 import { toast } from "sonner";
+import { setCurrentUser } from "../../lib/db";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -359,7 +360,14 @@ function SignupCard() {
         setLoading(false);
       }
     } else {
-      toast.error("O Supabase não está configurado localmente!");
+      // Local fallback: log in directly using the newly registered email as the tenant ID!
+      setCurrentUser({
+        role: "admin",
+        name: "Barbeiro Administrador",
+        email: email,
+      });
+      toast.success("Cadastro de teste efetuado e conectado com sucesso!");
+      navigate({ to: "/admin" });
       setLoading(false);
     }
   };
@@ -439,11 +447,6 @@ export function LandingPage() {
             <BarberGoLogo className="w-8 h-8" />
             <span className="text-lg font-extrabold tracking-tight">Meu Barbeiro <span className="text-amber-500">GO</span></span>
           </div>
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
-            <a href="#problema" className="hover:text-white transition-colors">Problema</a>
-            <a href="#plataforma" className="hover:text-white transition-colors">Plataforma</a>
-            <a href="#depoimentos" className="hover:text-white transition-colors">Depoimentos</a>
-          </nav>
           <div className="flex items-center gap-3">
             <Link
               to="/login"
@@ -485,147 +488,6 @@ export function LandingPage() {
 
             <div className="mt-12 flex justify-center">
               <PhoneMockup />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* PAS */}
-      <section id="problema" className="border-t border-zinc-900 bg-zinc-950">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-bold uppercase tracking-widest text-amber-400">O Problema</p>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight">
-              O que o caos da agenda manual está custando ao seu bolso hoje?
-            </h2>
-          </div>
-
-          <div className="mt-14 grid md:grid-cols-3 gap-5">
-            {[
-              {
-                Icon: MessageSquareX,
-                title: "Mensagens Perdidas no WhatsApp",
-                body: "Enquanto você corta cabelo, 3 clientes desistem esperando você responder para marcar um horário.",
-              },
-              {
-                Icon: CalendarX,
-                title: "Cadeiras Vazias e Furos",
-                body: "O cliente esquece que agendou e não aparece. Você perde o horário, o barbeiro perde a comissão e sua empresa perde dinheiro.",
-              },
-              {
-                Icon: TrendingDown,
-                title: "Falta de Caixa Oculta",
-                body: "Você não sabe exatamente quanto faturou na semana, quem pagou em dinheiro ou quanto deve pagar de comissão para cada cadeira.",
-              },
-            ].map(({ Icon, title, body }) => (
-              <div
-                key={title}
-                className="group rounded-2xl bg-zinc-900/50 p-7 ring-1 ring-zinc-800 hover:ring-amber-500/40 hover:bg-zinc-900 transition-all"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 ring-1 ring-amber-500/20">
-                  <Icon className="h-6 w-6 text-amber-400" />
-                </div>
-                <h3 className="mt-5 text-lg font-bold text-white">{title}</h3>
-                <p className="mt-2 text-sm text-zinc-400 leading-relaxed">{body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PLATFORM PREVIEW */}
-      <section id="plataforma" className="border-t border-zinc-900 bg-gradient-to-b from-zinc-950 to-zinc-900/40">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-bold uppercase tracking-widest text-amber-400">A Solução</p>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Todo o controle da sua barbearia em 3 cliques rápidos.
-            </h2>
-          </div>
-          <div className="mt-12">
-            <PreviewTabs />
-          </div>
-        </div>
-      </section>
-
-      {/* SOCIAL PROOF */}
-      <section id="depoimentos" className="border-t border-zinc-900">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-bold uppercase tracking-widest text-amber-400">Resultados</p>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Quem assumiu o controle mudou o jogo.
-            </h2>
-          </div>
-
-          <div className="mt-12 grid md:grid-cols-2 gap-6">
-            {[
-              {
-                name: "Marcos Oliveira",
-                role: "Dono — Studio Lâmina, SP",
-                initials: "MO",
-                quote:
-                  "Aumentei o faturamento em 35% nos primeiros 20 dias usando o Meu Barbeiro GO. Os no-shows praticamente sumiram com o lembrete automático.",
-                metric: "+35% faturamento",
-              },
-              {
-                name: "Diego Ferreira",
-                role: "Dono — Barbearia Rei, RJ",
-                initials: "DF",
-                quote:
-                  "Antes eu perdia horas no WhatsApp respondendo cliente. Hoje a agenda se enche sozinha e eu fecho o caixa em 2 minutos.",
-                metric: "8h/semana economizadas",
-              },
-            ].map((t) => (
-              <div
-                key={t.name}
-                className="rounded-2xl bg-zinc-900/60 p-7 ring-1 ring-zinc-800"
-              >
-                <div className="flex gap-1 text-amber-400">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-current" />
-                  ))}
-                </div>
-                <p className="mt-4 text-lg font-medium leading-relaxed text-white">
-                  "{t.quote}"
-                </p>
-                <div className="mt-6 flex items-center justify-between border-t border-zinc-800 pt-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-sm font-extrabold text-zinc-950">
-                      {t.initials}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-white">{t.name}</p>
-                      <p className="text-xs text-zinc-400">{t.role}</p>
-                    </div>
-                  </div>
-                  <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-400 ring-1 ring-amber-500/30">
-                    {t.metric}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Risk reversal */}
-          <div className="mt-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 p-8 sm:p-10 text-zinc-950">
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-6 justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest">Garantia Total</p>
-                <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold">
-                  30 dias grátis. Sem cartão. Sem risco.
-                </h3>
-                <p className="mt-2 max-w-xl text-sm font-medium opacity-90">
-                  Se em um mês o Meu Barbeiro GO não organizar sua agenda e aumentar seu faturamento,
-                  você simplesmente para de usar. Nada cobrado.
-                </p>
-              </div>
-              <a
-                href="#hero"
-                className="inline-flex items-center gap-2 rounded-lg bg-zinc-950 px-6 py-4 text-sm font-bold text-amber-400 hover:bg-zinc-900 transition-colors whitespace-nowrap"
-              >
-                Começar agora <ChevronRight className="h-4 w-4" />
-              </a>
             </div>
           </div>
         </div>

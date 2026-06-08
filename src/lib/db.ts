@@ -48,10 +48,36 @@ export interface Appointment {
 
 const isServer = typeof window === "undefined";
 
+export const getCurrentTenantId = (): string => {
+  if (isServer) return "default";
+  const sessionItem = window.localStorage.getItem("mbg_session");
+  if (sessionItem) {
+    try {
+      const session = JSON.parse(sessionItem);
+      if (session && session.role === "admin" && session.email) {
+        return session.email;
+      }
+    } catch (e) {
+      console.error("Erro ao ler sessão:", e);
+    }
+  }
+  const clientTenant = window.localStorage.getItem("mbg_client_tenant");
+  return clientTenant || "default";
+};
+
+const getTenantKey = (key: string): string => {
+  if (key === "mbg_session" || key === "mbg_client_tenant") {
+    return key;
+  }
+  const tenantId = getCurrentTenantId();
+  return `${key}_${tenantId}`;
+};
+
 const getStorageItem = <T>(key: string, defaultValue: T): T => {
   if (isServer) return defaultValue;
   try {
-    const item = window.localStorage.getItem(key);
+    const tenantKey = getTenantKey(key);
+    const item = window.localStorage.getItem(tenantKey);
     return item ? JSON.parse(item) : defaultValue;
   } catch (error) {
     console.error("Erro ao ler localStorage:", key, error);
@@ -62,7 +88,8 @@ const getStorageItem = <T>(key: string, defaultValue: T): T => {
 const setStorageItem = <T>(key: string, value: T): void => {
   if (isServer) return;
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    const tenantKey = getTenantKey(key);
+    window.localStorage.setItem(tenantKey, JSON.stringify(value));
   } catch (error) {
     console.error("Erro ao gravar localStorage:", key, error);
   }
@@ -167,17 +194,18 @@ export const DEFAULT_ADMIN_PHONE = "5562993299120";
 
 export const initDB = () => {
   if (isServer) return;
-  if (!window.localStorage.getItem("mbg_barbers")) {
-    setStorageItem("mbg_barbers", defaultBarbers);
+  const tenantId = getCurrentTenantId();
+  if (!window.localStorage.getItem(`mbg_barbers_${tenantId}`)) {
+    window.localStorage.setItem(`mbg_barbers_${tenantId}`, JSON.stringify(defaultBarbers));
   }
-  if (!window.localStorage.getItem("mbg_services")) {
-    setStorageItem("mbg_services", defaultServices);
+  if (!window.localStorage.getItem(`mbg_services_${tenantId}`)) {
+    window.localStorage.setItem(`mbg_services_${tenantId}`, JSON.stringify(defaultServices));
   }
-  if (!window.localStorage.getItem("mbg_clients")) {
-    setStorageItem("mbg_clients", []);
+  if (!window.localStorage.getItem(`mbg_clients_${tenantId}`)) {
+    window.localStorage.setItem(`mbg_clients_${tenantId}`, JSON.stringify([]));
   }
-  if (!window.localStorage.getItem("mbg_appointments")) {
-    setStorageItem("mbg_appointments", []);
+  if (!window.localStorage.getItem(`mbg_appointments_${tenantId}`)) {
+    window.localStorage.setItem(`mbg_appointments_${tenantId}`, JSON.stringify([]));
   }
 };
 
@@ -624,6 +652,18 @@ export const logout = () => {
   if (isServer) return;
   window.localStorage.removeItem("mbg_session");
   toast.info("Sessão encerrada.");
+};
+
+export const resetLocalDB = () => {
+  if (isServer) return;
+  const tenantId = getCurrentTenantId();
+  window.localStorage.removeItem(`mbg_barbers_${tenantId}`);
+  window.localStorage.removeItem(`mbg_services_${tenantId}`);
+  window.localStorage.removeItem(`mbg_clients_${tenantId}`);
+  window.localStorage.removeItem(`mbg_appointments_${tenantId}`);
+  window.localStorage.removeItem("mbg_session");
+  initDB();
+  toast.success("Todos os dados foram resetados para o padrão!");
 };
 
 // --- STATS ---

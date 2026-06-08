@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   Search,
   AlertTriangle,
+  RotateCcw,
 } from "lucide-react";
 import { BarberGoLogo } from "../components/ui/logo";
 import { toast } from "sonner";
@@ -26,6 +27,7 @@ import {
   Barber,
   Appointment,
   DEFAULT_ADMIN_PHONE,
+  resetLocalDB,
 } from "../lib/db";
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -53,6 +55,13 @@ function ClientDashboard() {
 
   // Load session
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tenant = params.get("t") || params.get("barberia");
+      if (tenant) {
+        window.localStorage.setItem("mbg_client_tenant", tenant);
+      }
+    }
     const user = getCurrentUser();
     if (!user) {
       navigate({ to: "/login" });
@@ -64,6 +73,15 @@ function ClientDashboard() {
   const handleLogout = () => {
     logout();
     navigate({ to: "/" });
+  };
+
+  const handleResetData = () => {
+    if (confirm("ATENÇÃO: Isso irá apagar todos os seus agendamentos e dados locais. Deseja continuar?")) {
+      resetLocalDB();
+      setTimeout(() => {
+        window.location.reload();
+      }, 800);
+    }
   };
 
   if (!session) {
@@ -86,8 +104,15 @@ function ClientDashboard() {
           <div className="flex items-center gap-3">
             <span className="text-xs text-zinc-400 font-medium">Olá, {session.name}</span>
             <button
+              onClick={handleResetData}
+              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-amber-400 transition-colors cursor-pointer"
+              title="Resetar Todos os Dados Locais"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+            </button>
+            <button
               onClick={handleLogout}
-              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-red-400 transition-colors"
+              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
               title="Sair"
             >
               <LogOut className="h-3.5 w-3.5" />
@@ -292,11 +317,11 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
     return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
   };
 
-  // Available times logic
+  // Available times logic (every 30 minutes)
   const allTimeSlots = [
-    "08:00", "08:15", "08:30", "08:45", "09:00", "09:15", "09:30", "09:45", "10:00", "10:15", "10:30", "10:45", "11:00", "11:15", "11:30", "11:45",
-    "13:00", "13:15", "13:30", "13:45", "14:00", "14:15", "14:30", "14:45", "15:00", "15:15", "15:30", "15:45", "16:00", "16:15", "16:30", "16:45",
-    "17:00", "17:15", "17:30", "17:45", "18:00", "18:15", "18:30", "18:45"
+    "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+    "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
+    "17:00", "17:30", "18:00", "18:30"
   ];
 
   // checking booked slots
@@ -597,7 +622,7 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
           {/* Grid selection */}
           <div className="mt-4">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2.5">Escolha um horário</h3>
-            <div className="grid grid-cols-5 gap-1.5 max-h-[220px] overflow-y-auto pr-1">
+            <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 max-h-[220px] overflow-y-auto pr-1">
               {(() => {
                 const activeSlots = allTimeSlots.filter((time) => {
                   const barberStart = selectedBarber?.startTime || "08:00";

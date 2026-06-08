@@ -35,6 +35,13 @@ function LoginPage() {
 
   // Check if already logged in
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tenant = params.get("t") || params.get("barberia");
+      if (tenant) {
+        window.localStorage.setItem("mbg_client_tenant", tenant);
+      }
+    }
     const session = getCurrentUser();
     if (session) {
       if (session.role === "admin") {
@@ -103,17 +110,17 @@ function LoginPage() {
         setLoading(false);
       }
     } else {
-      // Fallback local if Supabase is not configured
-      if (adminEmail === "admin@barberboss.com" && adminPassword === "123456") {
+      // Fallback local if Supabase is not configured: allow any email with password '123456'
+      if (adminPassword === "123456") {
         setCurrentUser({
           role: "admin",
-          name: "Barbeiro Administrador",
+          name: adminEmail.split("@")[0].toUpperCase(),
           email: adminEmail,
         });
-        toast.success("Login de teste efetuado com sucesso!");
+        toast.success(`Login de teste para ${adminEmail} efetuado!`);
         navigate({ to: "/admin" });
       } else {
-        toast.error("E-mail ou senha incorretos!");
+        toast.error("Para testes locais, utilize a senha padrão 123456.");
       }
       setLoading(false);
     }

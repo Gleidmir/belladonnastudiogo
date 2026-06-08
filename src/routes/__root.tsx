@@ -168,6 +168,13 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tenant = params.get("t") || params.get("barberia");
+      if (tenant) {
+        window.localStorage.setItem("mbg_client_tenant", tenant);
+      }
+    }
     initDB();
   }, []);
 

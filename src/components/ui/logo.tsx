@@ -16,7 +16,7 @@ export function BarberGoLogo({ className = "w-12 h-12" }: { className?: string }
           rx="24"
           stroke="url(#goldGradient)"
           strokeWidth="4"
-          fill="#0c0a09"
+          fill="#09090b"
         />
         <rect
           x="8"
@@ -63,9 +63,9 @@ export function BarberGoLogo({ className = "w-12 h-12" }: { className?: string }
         {/* Gold Gradient Definitions */}
         <defs>
           <linearGradient id="goldGradient" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#f59e0b" /> {/* Amber 500 */}
-            <stop offset="50%" stopColor="#fbbf24" /> {/* Amber 400 */}
-            <stop offset="100%" stopColor="#d97706" /> {/* Amber 600 */}
+            <stop offset="0%" stopColor="#4ade80" /> {/* Light Green */}
+            <stop offset="50%" stopColor="#86efac" />
+            <stop offset="100%" stopColor="#22c55e" />
           </linearGradient>
         </defs>
       </svg>
