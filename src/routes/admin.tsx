@@ -79,6 +79,12 @@ function WhatsAppIcon({ className }: { className?: string }) {
 }
 
 export const Route = createFileRoute("/admin")({
+  head: () => ({
+    meta: [
+      { title: "Painel do Barbeiro - Meu Barbeiro GO" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: AdminDashboard,
 });
 

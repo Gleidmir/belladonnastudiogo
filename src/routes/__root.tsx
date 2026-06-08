@@ -96,6 +96,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "apple-mobile-web-app-title", content: "Meu Barbeiro GO" },
       { name: "theme-color", content: "#09090b" },
+      { name: "keywords", content: "barbearia, agendamento online, barbearia goiás, agendamento de barbeiro, cortar cabelo, fazer barba, barbearia go, meubarbeiro" },
+      { name: "robots", content: "index, follow" },
     ],
     links: [
       {
@@ -110,6 +112,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "apple-touch-icon",
         href: "https://storage.googleapis.com/gpt-engineer-file-uploads/5eQXshP4n1S4KwIxT0t4cuyPGzH3/social-images/social-1780800297053-IMAGEM_APP.webp",
       },
+      {
+        rel: "canonical",
+        href: "https://meubarbeirogo.netlify.app",
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "HairSalon",
+          "name": "Meu Barbeiro GO",
+          "image": "https://storage.googleapis.com/gpt-engineer-file-uploads/5eQXshP4n1S4KwIxT0t4cuyPGzH3/social-images/social-1780800297053-IMAGEM_APP.webp",
+          "url": "https://meubarbeirogo.netlify.app",
+          "telephone": "+5562999999999",
+          "priceRange": "$$",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Goiânia",
+            "addressRegion": "GO",
+            "addressCountry": "BR"
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            "opens": "08:00",
+            "closes": "19:00"
+          }
+        })
+      }
     ],
   }),
   shellComponent: RootShell,
@@ -120,7 +152,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>

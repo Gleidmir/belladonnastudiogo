@@ -7,6 +7,16 @@ import { getCurrentUser, setCurrentUser, addClient } from "../lib/db";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
 export const Route = createFileRoute("/login")({
+  head: () => ({
+    meta: [
+      { title: "Entrar - Meu Barbeiro GO" },
+      { name: "description", content: "Acesse sua conta para agendar horários ou gerenciar atendimentos na barbearia." },
+      { name: "robots", content: "index, follow" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://meubarbeirogo.netlify.app/login" }
+    ]
+  }),
   component: LoginPage,
 });
 

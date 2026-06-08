@@ -37,6 +37,12 @@ function WhatsAppIcon({ className }: { className?: string }) {
 }
 
 export const Route = createFileRoute("/client")({
+  head: () => ({
+    meta: [
+      { title: "Painel do Cliente - Meu Barbeiro GO" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: ClientDashboard,
 });
 
