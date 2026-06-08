@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { BarberGoLogo } from "../ui/logo";
 import {
   MessageSquareX,
   CalendarX,
@@ -13,7 +15,10 @@ import {
   ChevronRight,
   Clock,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
+import { supabase, isSupabaseConfigured } from "../../lib/supabase";
+import { toast } from "sonner";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -208,7 +213,7 @@ function ClientApp() {
             <div className="flex justify-center pb-2">
               <div className="h-4 w-20 rounded-full bg-zinc-800" />
             </div>
-            <p className="text-[10px] uppercase tracking-widest text-zinc-500">BarberPass</p>
+            <p className="text-[10px] uppercase tracking-widest text-zinc-500">Meu Barbeiro GO</p>
             <p className="mt-1 text-lg font-extrabold text-white">Agende em 3 toques</p>
 
             <p className="mt-5 text-[11px] font-semibold text-zinc-400">1. Profissional</p>
@@ -292,8 +297,8 @@ function PreviewTabs() {
     <div>
       <div className="flex flex-col sm:flex-row gap-2 rounded-2xl bg-zinc-900/60 p-2 ring-1 ring-zinc-800 max-w-2xl mx-auto">
         {[
-          { id: "admin" as const, label: "Painel do Administrador (BarberBoss)" },
-          { id: "client" as const, label: "App do Cliente (BarberPass)" },
+          { id: "admin" as const, label: "Painel do Administrador (Meu Barbeiro GO)" },
+          { id: "client" as const, label: "App do Cliente (Meu Barbeiro GO)" },
         ].map((t) => (
           <button
             key={t.id}
@@ -316,12 +321,52 @@ function PreviewTabs() {
 function SignupCard() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
+  const [loading, setLoading] = useState(false);
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const passValid = pass.length >= 6;
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailValid || !passValid) {
+      toast.error("Por favor, preencha um e-mail válido e uma senha com no mínimo 6 caracteres.");
+      return;
+    }
+
+    setLoading(true);
+
+    if (isSupabaseConfigured) {
+      try {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password: pass,
+          options: {
+            data: {
+              role: "admin",
+              name: "Barbeiro Administrador",
+            }
+          }
+        });
+
+        if (error) throw error;
+
+        toast.success("Cadastro efetuado! Se necessário, confirme seu e-mail ou faça login no painel.");
+        navigate({ to: "/login" });
+      } catch (error: any) {
+        console.error("Erro no cadastro:", error);
+        toast.error(error.message || "Erro ao efetuar cadastro. Tente novamente.");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      toast.error("O Supabase não está configurado localmente!");
+      setLoading(false);
+    }
+  };
 
   return (
     <form
-      onSubmit={(e) => e.preventDefault()}
+      onSubmit={handleSubmit}
       className="rounded-2xl bg-zinc-900/80 p-6 ring-1 ring-zinc-800 backdrop-blur-sm shadow-2xl"
     >
       <div className="flex items-center gap-2">
@@ -372,9 +417,10 @@ function SignupCard() {
 
       <button
         type="submit"
-        className="mt-5 w-full rounded-lg bg-amber-500 px-6 py-4 text-sm font-bold tracking-wide text-zinc-950 hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20"
+        disabled={loading}
+        className="mt-5 w-full rounded-lg bg-amber-500 px-6 py-4 text-sm font-bold tracking-wide text-zinc-950 hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
       >
-        CRIAR MINHA CONTA BARBERBOSS →
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "CRIAR MINHA CONTA MEU BARBEIRO GO →"}
       </button>
       <p className="mt-3 text-center text-xs text-zinc-500">
         ✓ Sem cartão de crédito. Teste grátis por 1 mês completo.
@@ -389,23 +435,29 @@ export function LandingPage() {
       {/* Nav */}
       <header className="border-b border-zinc-900">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500">
-              <Scissors className="h-5 w-5 text-zinc-950" />
-            </div>
-            <span className="text-lg font-extrabold tracking-tight">BarberBoss</span>
+          <div className="flex items-center gap-2.5">
+            <BarberGoLogo className="w-8 h-8" />
+            <span className="text-lg font-extrabold tracking-tight">Meu Barbeiro <span className="text-amber-500">GO</span></span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
             <a href="#problema" className="hover:text-white transition-colors">Problema</a>
             <a href="#plataforma" className="hover:text-white transition-colors">Plataforma</a>
             <a href="#depoimentos" className="hover:text-white transition-colors">Depoimentos</a>
           </nav>
-          <a
-            href="#hero"
-            className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-zinc-950 hover:bg-amber-400 transition-colors"
-          >
-            Teste Grátis
-          </a>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/login"
+              className="rounded-lg border border-zinc-800 px-4 py-2 text-sm font-bold text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+            >
+              Entrar
+            </Link>
+            <Link
+              to="/login"
+              className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-zinc-950 hover:bg-amber-400 transition-colors"
+            >
+              Teste Grátis
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -423,7 +475,7 @@ export function LandingPage() {
             </h1>
             <p className="mt-6 text-base sm:text-lg text-zinc-400 leading-relaxed max-w-2xl">
               Elimine o caos das mensagens de WhatsApp. Deixe que o{" "}
-              <span className="font-semibold text-white">BarberPass</span> agende seus clientes
+              <span className="font-semibold text-white">Meu Barbeiro GO</span> agende seus clientes
               sozinhos enquanto você lucra mais e monitora tudo em tempo real.
             </p>
 
@@ -513,7 +565,7 @@ export function LandingPage() {
                 role: "Dono — Studio Lâmina, SP",
                 initials: "MO",
                 quote:
-                  "Aumentei o faturamento em 35% nos primeiros 20 dias usando o BarberBoss. Os no-shows praticamente sumiram com o lembrete automático.",
+                  "Aumentei o faturamento em 35% nos primeiros 20 dias usando o Meu Barbeiro GO. Os no-shows praticamente sumiram com o lembrete automático.",
                 metric: "+35% faturamento",
               },
               {
@@ -564,7 +616,7 @@ export function LandingPage() {
                   30 dias grátis. Sem cartão. Sem risco.
                 </h3>
                 <p className="mt-2 max-w-xl text-sm font-medium opacity-90">
-                  Se em um mês o BarberBoss não organizar sua agenda e aumentar seu faturamento,
+                  Se em um mês o Meu Barbeiro GO não organizar sua agenda e aumentar seu faturamento,
                   você simplesmente para de usar. Nada cobrado.
                 </p>
               </div>
@@ -583,11 +635,9 @@ export function LandingPage() {
       <footer className="border-t border-zinc-900 bg-zinc-950">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500">
-                <Scissors className="h-4 w-4 text-zinc-950" />
-              </div>
-              <span className="font-extrabold tracking-tight">BarberBoss</span>
+            <div className="flex items-center gap-2.5">
+              <BarberGoLogo className="w-8 h-8" />
+              <span className="font-extrabold tracking-tight">Meu Barbeiro <span className="text-amber-500">GO</span></span>
               <span className="ml-3 hidden sm:inline text-xs text-zinc-500">
                 © {new Date().getFullYear()} — Todos os direitos reservados
               </span>

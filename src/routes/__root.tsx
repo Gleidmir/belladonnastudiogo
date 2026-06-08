@@ -8,6 +8,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Toaster } from "sonner";
+import { initDB } from "../lib/db";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -78,22 +80,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "MEU BARBEIRO GO" },
-      { name: "description", content: "BarberBoss Pilot is a SaaS landing page and setup wizard for barber shop management." },
-      { name: "author", content: "Lovable" },
+      { name: "description", content: "Meu Barbeiro GO — Seu corte, sua hora, você no controle. Sistema de agendamento online fácil e prático para barbearias." },
+      { name: "author", content: "Meu Barbeiro GO" },
       { property: "og:title", content: "MEU BARBEIRO GO" },
-      { property: "og:description", content: "BarberBoss Pilot is a SaaS landing page and setup wizard for barber shop management." },
+      { property: "og:description", content: "Meu Barbeiro GO — Seu corte, sua hora, você no controle. Sistema de agendamento online fácil e prático para barbearias." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@meubarbeirogo" },
       { name: "twitter:title", content: "MEU BARBEIRO GO" },
-      { name: "twitter:description", content: "BarberBoss Pilot is a SaaS landing page and setup wizard for barber shop management." },
+      { name: "twitter:description", content: "Meu Barbeiro GO — Seu corte, sua hora, você no controle. Sistema de agendamento online fácil e prático para barbearias." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/5eQXshP4n1S4KwIxT0t4cuyPGzH3/social-images/social-1780800297053-IMAGEM_APP.webp" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/5eQXshP4n1S4KwIxT0t4cuyPGzH3/social-images/social-1780800297053-IMAGEM_APP.webp" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Meu Barbeiro GO" },
+      { name: "theme-color", content: "#09090b" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "manifest",
+        href: "/manifest.json",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "https://storage.googleapis.com/gpt-engineer-file-uploads/5eQXshP4n1S4KwIxT0t4cuyPGzH3/social-images/social-1780800297053-IMAGEM_APP.webp",
       },
     ],
   }),
@@ -120,10 +135,15 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    initDB();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <Toaster richColors position="top-right" />
     </QueryClientProvider>
   );
 }

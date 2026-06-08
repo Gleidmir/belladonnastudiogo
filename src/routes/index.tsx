@@ -4,17 +4,17 @@ import { LandingPage } from "@/components/landing/LandingPage";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BarberBoss — Sua Barbearia no Piloto Automático" },
+      { title: "Meu Barbeiro GO — Seu Corte, Sua Hora" },
       {
         name: "description",
         content:
-          "Sistema completo para gestão de barbearias. Agendamento automático, controle de caixa e comissões. 30 dias grátis, sem cartão de crédito.",
+          "Agende seu horário online em poucos cliques. Simples, rápido e no seu controle.",
       },
-      { property: "og:title", content: "BarberBoss — Sua Barbearia no Piloto Automático" },
+      { property: "og:title", content: "Meu Barbeiro GO — Seu Corte, Sua Hora" },
       {
         property: "og:description",
         content:
-          "Elimine o caos do WhatsApp. Agende clientes, controle caixa e comissões em tempo real.",
+          "Elimine a espera. Agende seu corte de cabelo e barba em tempo real.",
       },
       { property: "og:type", content: "website" },
     ],

@@ -1,0 +1,18 @@
+{
+  "name": "Meu Barbeiro GO",
+  "short_name": "Barbeiro GO",
+  "description": "Seu corte, sua hora, você no controle. Agendamento online de barbearias.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#f59e0b",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://storage.googleapis.com/gpt-engineer-file-uploads/5eQXshP4n1S4KwIxT0t4cuyPGzH3/social-images/social-1780800297053-IMAGEM_APP.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ]
+}
