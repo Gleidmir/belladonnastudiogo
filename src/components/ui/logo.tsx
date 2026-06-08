@@ -1,9 +1,9 @@
-export function BarberGoLogo({ className = "w-12 h-12" }: { className?: string }) {
+export function BarberGoLogo({ className = "w-12 h-12", animate = true }: { className?: string; animate?: boolean }) {
   return (
-    <div className={`relative flex items-center justify-center ${className}`}>
+    <div className={`relative flex items-center justify-center ${animate ? "animate-pulse" : ""} ${className}`}>
       <svg
         viewBox="0 0 100 100"
-        className="w-full h-full drop-shadow-[0_4px_8px_rgba(245,158,11,0.15)]"
+        className="w-full h-full drop-shadow-[0_0_12px_rgba(74,222,128,0.4)]"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
