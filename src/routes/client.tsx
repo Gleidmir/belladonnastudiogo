@@ -55,16 +55,19 @@ function ClientDashboard() {
 
   // Load session
   useEffect(() => {
+    let tenant = "";
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      const tenant = params.get("t") || params.get("barberia");
+      tenant = params.get("t") || params.get("barberia") || "";
       if (tenant) {
         window.localStorage.setItem("mbg_client_tenant", tenant);
+      } else {
+        tenant = window.localStorage.getItem("mbg_client_tenant") || "";
       }
     }
     const user = getCurrentUser();
     if (!user) {
-      navigate({ to: "/login" });
+      navigate({ to: tenant ? `/login?t=${tenant}` : "/login" });
     } else {
       setSession(user);
     }
@@ -75,14 +78,7 @@ function ClientDashboard() {
     navigate({ to: "/" });
   };
 
-  const handleResetData = async () => {
-    if (confirm("ATENÇÃO: Isso irá apagar todos os seus agendamentos finalizados ou cancelados e histórico. O cadastro de barbeiros e serviços será preservado. Deseja continuar?")) {
-      await resetLocalDB();
-      setTimeout(() => {
-        window.location.reload();
-      }, 800);
-    }
-  };
+
 
   if (!session) {
     return (
@@ -103,13 +99,6 @@ function ClientDashboard() {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs text-zinc-400 font-medium">Olá, {session.name}</span>
-            <button
-              onClick={handleResetData}
-              className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-colors cursor-pointer"
-              title="Resetar Dados Locais"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-            </button>
             <button
               onClick={handleLogout}
               className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
@@ -834,15 +823,20 @@ interface MyAppointmentsProps {
 
 function MyAppointments({ clientPhone }: MyAppointmentsProps) {
   const [apts, setApts] = useState<Appointment[]>([]);
+  const [barbers, setBarbers] = useState<Barber[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Reload bookings
   const loadAppointments = async () => {
     setLoading(true);
     try {
-      const all = await getAppointments();
-      const clientApts = all.filter((a) => a.clientPhone === clientPhone);
+      const [allApts, allBarbers] = await Promise.all([
+        getAppointments(),
+        getBarbers()
+      ]);
+      const clientApts = allApts.filter((a) => a.clientPhone === clientPhone);
       setApts(clientApts);
+      setBarbers(allBarbers);
     } catch (e) {
       console.error(e);
       toast.error("Erro ao carregar seus agendamentos.");
@@ -867,6 +861,27 @@ function MyAppointments({ clientPhone }: MyAppointmentsProps) {
         setLoading(false);
       }
     }
+  };
+
+  const getBarberWhatsAppLink = (apt: Appointment) => {
+    const barber = barbers.find((b) => b.id === apt.barberId);
+    let rawPhone = barber?.phone || DEFAULT_ADMIN_PHONE;
+    let cleanPhone = rawPhone.replace(/\D/g, "");
+    
+    if (cleanPhone.length >= 10 && cleanPhone.length <= 11 && !cleanPhone.startsWith("55")) {
+      cleanPhone = "55" + cleanPhone;
+    } else if (cleanPhone.length === 0) {
+      cleanPhone = DEFAULT_ADMIN_PHONE;
+    }
+
+    const dateStr = new Date(apt.date + "T12:00:00").toLocaleDateString("pt-BR");
+    const message = `Olá, ${apt.barberName}! Sou o cliente ${apt.clientName} e estou enviando esta mensagem para confirmar meu agendamento no aplicativo:\n\n` +
+      `💇 *Serviço:* ${apt.serviceName}\n` +
+      `📅 *Data:* ${dateStr}\n` +
+      `⏰ *Horário:* ${apt.time}\n\n` +
+      `Está tudo confirmado? Obrigado!`;
+
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
   };
 
   if (loading && apts.length === 0) {
@@ -939,14 +954,25 @@ function MyAppointments({ clientPhone }: MyAppointmentsProps) {
                 </div>
               </div>
 
-              {/* Action for cancellation */}
+              {/* Action buttons */}
               {apt.status === "pending" && (
-                <button
-                  onClick={() => handleCancel(apt.id)}
-                  className="w-full text-center mt-1 py-1.5 rounded-lg border border-red-500/20 text-[10px] font-bold text-red-400 hover:bg-red-500/5 transition-colors"
-                >
-                  Cancelar Agendamento
-                </button>
+                <div className="flex gap-2 mt-1 w-full">
+                  <a
+                    href={getBarberWhatsAppLink(apt)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 text-center py-2 rounded-xl bg-green-600 hover:bg-green-500 text-[10px] font-bold text-white transition-colors flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+                  >
+                    <WhatsAppIcon className="h-3.5 w-3.5" />
+                    <span>Confirmar</span>
+                  </a>
+                  <button
+                    onClick={() => handleCancel(apt.id)}
+                    className="flex-1 text-center py-2 rounded-xl border border-red-500/20 text-[10px] font-bold text-red-400 hover:bg-red-500/5 transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                </div>
               )}
             </div>
           ))}

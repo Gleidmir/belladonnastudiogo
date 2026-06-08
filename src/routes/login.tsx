@@ -24,6 +24,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"client" | "admin">("client");
   const [loading, setLoading] = useState(false);
+  const [isClientOnly, setIsClientOnly] = useState(false);
 
   // Client form state
   const [clientName, setClientName] = useState("");
@@ -40,6 +41,8 @@ function LoginPage() {
       const tenant = params.get("t") || params.get("barberia");
       if (tenant) {
         window.localStorage.setItem("mbg_client_tenant", tenant);
+        setIsClientOnly(true);
+        setActiveTab("client");
       }
     }
     const session = getCurrentUser();
@@ -143,30 +146,36 @@ function LoginPage() {
         <div className="w-full max-w-md bg-zinc-900/60 ring-1 ring-zinc-800 rounded-3xl p-8 backdrop-blur-md shadow-2xl">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <BarberGoLogo className="w-16 h-16 mb-3" />
+            <BarberGoLogo className="w-16 h-16 mb-3 animate-pulse" />
             <h1 className="text-2xl font-extrabold tracking-tight">Meu Barbeiro <span className="text-amber-500">GO</span></h1>
-            <p className="text-zinc-500 text-xs mt-1">Selecione como deseja acessar</p>
+            <p className="text-zinc-500 text-xs mt-1">
+              {isClientOnly ? "Identifique-se para Agendar seu Horário" : "Selecione como deseja acessar"}
+            </p>
           </div>
-
+ 
           {/* Role selection tab */}
-          <div className="flex rounded-xl bg-zinc-950/80 p-1 ring-1 ring-zinc-800 mb-6">
-            <button
-              onClick={() => setActiveTab("client")}
-              className={`flex-1 rounded-lg py-2.5 text-xs font-bold transition-all ${
-                activeTab === "client" ? "bg-amber-500 text-zinc-950 shadow-md" : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              Sou Cliente
-            </button>
-            <button
-              onClick={() => setActiveTab("admin")}
-              className={`flex-1 rounded-lg py-2.5 text-xs font-bold transition-all ${
-                activeTab === "admin" ? "bg-amber-500 text-zinc-950 shadow-md" : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              Sou Barbeiro / ADM
-            </button>
-          </div>
+          {!isClientOnly && (
+            <div className="flex rounded-xl bg-zinc-950/80 p-1 ring-1 ring-zinc-800 mb-6">
+              <button
+                type="button"
+                onClick={() => setActiveTab("client")}
+                className={`flex-1 rounded-lg py-2.5 text-xs font-bold transition-all ${
+                  activeTab === "client" ? "bg-amber-500 text-zinc-950 shadow-md" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                Sou Cliente
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("admin")}
+                className={`flex-1 rounded-lg py-2.5 text-xs font-bold transition-all ${
+                  activeTab === "admin" ? "bg-amber-500 text-zinc-950 shadow-md" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                Sou Barbeiro / ADM
+              </button>
+            </div>
+          )}
 
           {activeTab === "client" ? (
             /* CLIENT FORM */
