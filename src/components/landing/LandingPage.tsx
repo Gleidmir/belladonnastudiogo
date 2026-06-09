@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "../../lib/supabase";
 import { toast } from "sonner";
-import { setCurrentUser } from "../../lib/db";
+import { setCurrentUser, getCurrentUser } from "../../lib/db";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -371,9 +371,18 @@ export function LandingPage() {
     if (typeof window !== "undefined") {
       const isPWA = window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone;
       const savedTenant = window.localStorage.getItem("mbg_client_tenant");
+      const user = getCurrentUser();
       
-      if (isPWA && savedTenant) {
-        navigate({ to: `/client?t=${savedTenant}` });
+      if (isPWA) {
+        if (user) {
+          if (user.role === "admin") {
+            navigate({ to: "/admin" });
+          } else {
+            navigate({ to: `/client?t=${savedTenant || "default"}` });
+          }
+        } else if (savedTenant) {
+          navigate({ to: `/client?t=${savedTenant}` });
+        }
       }
     }
   }, [navigate]);
