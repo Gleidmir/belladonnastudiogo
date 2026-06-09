@@ -45,11 +45,13 @@ function LoginPage() {
         setActiveTab("admin");
         window.localStorage.removeItem("mbg_client_tenant");
       } else {
-        const tenant = params.get("t") || params.get("barberia") || window.localStorage.getItem("mbg_client_tenant");
+        const tenant = params.get("t") || params.get("barberia");
         if (tenant) {
           window.localStorage.setItem("mbg_client_tenant", tenant);
           setIsClientOnly(true);
           setActiveTab("client");
+        } else {
+          setIsClientOnly(false);
         }
       }
     }
