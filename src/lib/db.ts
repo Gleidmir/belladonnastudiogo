@@ -662,6 +662,7 @@ export const updateAppointmentStatus = async (
       return;
     } catch (e) {
       console.error("Erro ao atualizar agendamento no Supabase:", e);
+      throw e;
     }
   }
 
