@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { BarberGoLogo } from "../ui/logo";
 import {
@@ -365,6 +365,19 @@ function SignupCard() {
 }
 
 export function LandingPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isPWA = window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone;
+      const savedTenant = window.localStorage.getItem("mbg_client_tenant");
+      
+      if (isPWA && savedTenant) {
+        navigate({ to: `/client?t=${savedTenant}` });
+      }
+    }
+  }, [navigate]);
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white antialiased">
       {/* Nav */}
