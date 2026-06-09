@@ -707,35 +707,53 @@ export const resetLocalDB = async () => {
 
   if (isSupabaseConfigured) {
     try {
-      // Deleta agendamentos finalizados ou cancelados no Supabase
+      // Deleta TODOS os agendamentos no Supabase
       const { error } = await supabase
         .from("appointments")
         .delete()
-        .neq("status", "pending");
+        .neq("id", "");
       if (error) throw error;
     } catch (e) {
-      console.error("Erro ao ler/limpar agendamentos no Supabase no reset:", e);
+      console.error("Erro ao limpar todos os agendamentos no Supabase no reset:", e);
       toast.error("Erro ao sincronizar reset com o servidor.");
       return;
     }
   }
 
   const appointmentsKey = `mbg_appointments_${tenantId}`;
+  window.localStorage.setItem(appointmentsKey, JSON.stringify([]));
+  toast.success("Histórico de atendimentos e faturamento zerados com sucesso!");
+};
+
+export const deleteClientAppointments = async (clientPhone: string): Promise<void> => {
+  if (isSupabaseConfigured) {
+    try {
+      const { error } = await supabase
+        .from("appointments")
+        .delete()
+        .eq("client_phone", clientPhone);
+      if (error) throw error;
+      toast.success("Histórico limpo no Supabase!");
+      return;
+    } catch (e) {
+      console.error("Erro ao limpar histórico no Supabase:", e);
+      throw e;
+    }
+  }
+
+  const tenantId = getCurrentTenantId();
+  const appointmentsKey = `mbg_appointments_${tenantId}`;
   const appointmentsStr = window.localStorage.getItem(appointmentsKey);
   if (appointmentsStr) {
     try {
       const appointments = JSON.parse(appointmentsStr) as Appointment[];
-      // Mantém apenas os agendamentos pendentes, removendo os finalizados e cancelados
-      const pendingAppointments = appointments.filter((apt) => apt.status === "pending");
-      window.localStorage.setItem(appointmentsKey, JSON.stringify(pendingAppointments));
+      const filtered = appointments.filter((a) => a.clientPhone !== clientPhone);
+      window.localStorage.setItem(appointmentsKey, JSON.stringify(filtered));
+      toast.success("Histórico limpo localmente!");
     } catch (e) {
-      console.error("Erro ao ler agendamentos no reset:", e);
-      window.localStorage.setItem(appointmentsKey, JSON.stringify([]));
+      console.error("Erro ao limpar histórico local:", e);
     }
-  } else {
-    window.localStorage.setItem(appointmentsKey, JSON.stringify([]));
   }
-  toast.success("Histórico de atendimentos e faturamento zerados com sucesso!");
 };
 
 // --- SUBSCRIPTION & TRIAL ---

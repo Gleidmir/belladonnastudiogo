@@ -81,6 +81,7 @@ ALTER TABLE public.appointments ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Permitir criar agendamentos" ON public.appointments FOR INSERT WITH CHECK (true);
 CREATE POLICY "Permitir leitura de agendamentos para todos" ON public.appointments FOR SELECT USING (true);
 CREATE POLICY "Permitir atualização de agendamentos para todos" ON public.appointments FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "Permitir exclusão de agendamentos para todos" ON public.appointments FOR DELETE USING (true);
 CREATE POLICY "Gerenciamento total por admins" ON public.appointments FOR ALL TO authenticated USING (true);
 
 

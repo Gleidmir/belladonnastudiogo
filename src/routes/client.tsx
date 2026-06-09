@@ -12,6 +12,7 @@ import {
   Search,
   AlertTriangle,
   RotateCcw,
+  Trash2,
 } from "lucide-react";
 import { BarberGoLogo } from "../components/ui/logo";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ import {
   addAppointment,
   getAppointments,
   updateAppointmentStatus,
+  deleteClientAppointments,
   Service,
   Barber,
   Appointment,
@@ -214,7 +216,7 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
     loadData();
   }, []);
 
-  // Load appointments dynamically when date or barber changes
+  // Load appointments dynamically when date, barber or activeTab changes
   useEffect(() => {
     if (step === "datetime") {
       const loadApts = async () => {
@@ -227,7 +229,7 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
       };
       loadApts();
     }
-  }, [step, selectedDate, selectedBarber]);
+  }, [step, selectedDate, selectedBarber, activeTab]);
 
   // Generate days slider based on selected month offset
   useEffect(() => {
@@ -849,7 +851,13 @@ function MyAppointments({ clientPhone }: MyAppointmentsProps) {
         getAppointments(),
         getBarbers()
       ]);
-      const clientApts = allApts.filter((a) => a.clientPhone === clientPhone);
+      
+      const dismissedStr = window.localStorage.getItem(`mbg_dismissed_apts_${clientPhone}`);
+      const dismissedIds = dismissedStr ? JSON.parse(dismissedStr) : [];
+
+      const clientApts = allApts.filter(
+        (a) => a.clientPhone === clientPhone && !dismissedIds.includes(a.id)
+      );
       setApts(clientApts);
       setBarbers(allBarbers);
     } catch (e) {
@@ -874,6 +882,31 @@ function MyAppointments({ clientPhone }: MyAppointmentsProps) {
         console.error(e);
         toast.error("Erro ao cancelar agendamento.");
         setLoading(false);
+      }
+    }
+  };
+
+  const handleClearHistory = async () => {
+    if (confirm("Deseja realmente limpar todo o histórico de agendamentos?")) {
+      setLoading(true);
+      try {
+        await deleteClientAppointments(clientPhone);
+        
+        // Also clean up local dismissed state since it is deleted from DB
+        window.localStorage.removeItem(`mbg_dismissed_apts_${clientPhone}`);
+        await loadAppointments();
+      } catch (e) {
+        console.error("Erro ao limpar histórico no banco, aplicando limpeza local...", e);
+        // Fallback: save all current apt IDs as dismissed locally
+        const currentIds = apts.map((a) => a.id);
+        const key = `mbg_dismissed_apts_${clientPhone}`;
+        const dismissedStr = window.localStorage.getItem(key);
+        const dismissedIds = dismissedStr ? JSON.parse(dismissedStr) : [];
+        const updated = Array.from(new Set([...dismissedIds, ...currentIds]));
+        window.localStorage.setItem(key, JSON.stringify(updated));
+        
+        toast.success("Histórico limpo localmente!");
+        await loadAppointments();
       }
     }
   };
@@ -909,7 +942,18 @@ function MyAppointments({ clientPhone }: MyAppointmentsProps) {
 
   return (
     <div className="py-2">
-      <h2 className="text-sm font-bold text-zinc-300 mb-4 uppercase tracking-wider">Histórico de Agendamentos</h2>
+      <div className="flex justify-between items-center mb-4 gap-2">
+        <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">Histórico de Agendamentos</h2>
+        {apts.length > 0 && (
+          <button
+            onClick={handleClearHistory}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-3.5 py-2 text-[10px] font-bold border border-red-500/20 hover:border-transparent transition-all cursor-pointer active:scale-95 shrink-0"
+            title="Limpar Histórico de Agendamentos"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Limpar Página
+          </button>
+        )}
+      </div>
 
       {apts.length === 0 ? (
         <div className="text-center py-12 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 p-6">

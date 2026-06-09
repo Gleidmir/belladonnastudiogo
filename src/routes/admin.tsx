@@ -262,7 +262,7 @@ function AdminDashboard() {
   };
 
   const handleResetData = async () => {
-    if (confirm("ATENÇÃO: Isso irá apagar todo o faturamento acumulado e os agendamentos finalizados ou cancelados. Os barbeiros, clientes cadastrados e serviços serão preservados. Deseja continuar?")) {
+    if (confirm("ATENÇÃO: Isso irá apagar TODOS os agendamentos (pendentes, finalizados e cancelados) e o faturamento acumulado. Os barbeiros, clientes cadastrados e serviços serão preservados. Deseja continuar?")) {
       await resetLocalDB();
       setTimeout(() => {
         window.location.reload();
