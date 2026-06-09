@@ -74,8 +74,9 @@ function ClientDashboard() {
   }, [navigate]);
 
   const handleLogout = () => {
+    const tenant = typeof window !== "undefined" ? window.localStorage.getItem("mbg_client_tenant") : "";
     logout();
-    navigate({ to: "/" });
+    navigate({ to: tenant ? `/login?t=${tenant}` : "/login" });
   };
 
 
@@ -97,8 +98,15 @@ function ClientDashboard() {
             <BarberGoLogo className="w-8 h-8" />
             <span className="text-sm font-extrabold tracking-tight">Meu Barbeiro <span className="text-amber-500">GO</span></span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <span className="text-xs text-zinc-400 font-medium">Olá, {session.name}</span>
+            <button
+              onClick={handleLogout}
+              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-red-400 border border-zinc-800 transition-colors cursor-pointer flex items-center justify-center"
+              title="Sair"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
           </div>
         </div>
       </header>
