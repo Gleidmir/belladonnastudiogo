@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS public.barbers (
     start_time TEXT DEFAULT '08:00',
     end_time TEXT DEFAULT '19:00',
     blocked_dates TEXT DEFAULT '[]',
+    tenant_id TEXT DEFAULT 'default' NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -33,6 +34,7 @@ CREATE TABLE IF NOT EXISTS public.services (
     description TEXT,
     image_url TEXT,
     is_active BOOLEAN DEFAULT true NOT NULL,
+    tenant_id TEXT DEFAULT 'default' NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -47,11 +49,13 @@ CREATE TABLE IF NOT EXISTS public.clients (
     name TEXT NOT NULL,
     phone TEXT NOT NULL,
     email TEXT,
+    tenant_id TEXT DEFAULT 'default' NOT NULL,
     registered_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Criar índice para busca rápida por telefone
-CREATE UNIQUE INDEX IF NOT EXISTS clients_phone_idx ON public.clients (phone);
+-- Criar índice para busca rápida por telefone (único por barbearia)
+DROP INDEX IF EXISTS public.clients_phone_idx;
+CREATE UNIQUE INDEX IF NOT EXISTS clients_tenant_phone_idx ON public.clients (tenant_id, phone);
 
 -- Habilitar RLS para Clientes (Qualquer um pode ler/escrever para permitir agendamentos rápidos)
 ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
@@ -73,6 +77,7 @@ CREATE TABLE IF NOT EXISTS public.appointments (
     date DATE NOT NULL,
     time TEXT NOT NULL,
     status TEXT DEFAULT 'pending' NOT NULL, -- 'pending', 'completed', 'cancelled'
+    tenant_id TEXT DEFAULT 'default' NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

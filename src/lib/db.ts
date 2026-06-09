@@ -213,9 +213,11 @@ export const initDB = () => {
 export const getServices = async (): Promise<Service[]> => {
   if (isSupabaseConfigured) {
     try {
+      const tenantId = getCurrentTenantId();
       const { data, error } = await supabase
         .from("services")
         .select("*")
+        .eq("tenant_id", tenantId)
         .order("name", { ascending: true });
       if (error) throw error;
       return (data || []).map(mapServiceFromDB);
@@ -236,12 +238,14 @@ export const addService = async (service: Omit<Service, "id">): Promise<Service>
 
   if (isSupabaseConfigured) {
     try {
+      const tenantId = getCurrentTenantId();
       const { error } = await supabase.from("services").insert({
         id: newService.id,
         name: newService.name,
         price: newService.price,
         duration: newService.duration,
         is_active: newService.isActive,
+        tenant_id: tenantId,
       });
       if (error) throw error;
       toast.success("Serviço adicionado ao Supabase!");
@@ -262,6 +266,7 @@ export const addService = async (service: Omit<Service, "id">): Promise<Service>
 export const updateService = async (updatedService: Service): Promise<void> => {
   if (isSupabaseConfigured) {
     try {
+      const tenantId = getCurrentTenantId();
       const { error } = await supabase
         .from("services")
         .update({
@@ -270,7 +275,8 @@ export const updateService = async (updatedService: Service): Promise<void> => {
           duration: updatedService.duration,
           is_active: updatedService.isActive,
         })
-        .eq("id", updatedService.id);
+        .eq("id", updatedService.id)
+        .eq("tenant_id", tenantId);
       if (error) throw error;
       toast.success("Serviço atualizado no Supabase!");
       return;
@@ -291,7 +297,12 @@ export const updateService = async (updatedService: Service): Promise<void> => {
 export const deleteService = async (id: string): Promise<void> => {
   if (isSupabaseConfigured) {
     try {
-      const { error } = await supabase.from("services").delete().eq("id", id);
+      const tenantId = getCurrentTenantId();
+      const { error } = await supabase
+        .from("services")
+        .delete()
+        .eq("id", id)
+        .eq("tenant_id", tenantId);
       if (error) throw error;
       toast.success("Serviço removido do Supabase!");
       return;
@@ -310,7 +321,11 @@ export const deleteService = async (id: string): Promise<void> => {
 export const getBarbers = async (): Promise<Barber[]> => {
   if (isSupabaseConfigured) {
     try {
-      const { data, error } = await supabase.from("barbers").select("*");
+      const tenantId = getCurrentTenantId();
+      const { data, error } = await supabase
+        .from("barbers")
+        .select("*")
+        .eq("tenant_id", tenantId);
       if (error) throw error;
       if (data && data.length > 0) {
         return data.map(mapBarberFromDB);
@@ -331,6 +346,7 @@ export const addBarber = async (barber: Omit<Barber, "id">): Promise<Barber> => 
 
   if (isSupabaseConfigured) {
     try {
+      const tenantId = getCurrentTenantId();
       const { error } = await supabase.from("barbers").insert({
         id: newBarber.id,
         name: newBarber.name,
@@ -340,6 +356,7 @@ export const addBarber = async (barber: Omit<Barber, "id">): Promise<Barber> => 
         start_time: newBarber.startTime || "08:00",
         end_time: newBarber.endTime || "19:00",
         blocked_dates: JSON.stringify(newBarber.blockedDates || []),
+        tenant_id: tenantId,
       });
       if (error) throw error;
       toast.success("Barbeiro adicionado ao Supabase!");
@@ -360,6 +377,7 @@ export const addBarber = async (barber: Omit<Barber, "id">): Promise<Barber> => 
 export const updateBarber = async (updatedBarber: Barber): Promise<void> => {
   if (isSupabaseConfigured) {
     try {
+      const tenantId = getCurrentTenantId();
       const { error } = await supabase
         .from("barbers")
         .update({
@@ -371,7 +389,8 @@ export const updateBarber = async (updatedBarber: Barber): Promise<void> => {
           end_time: updatedBarber.endTime || "19:00",
           blocked_dates: JSON.stringify(updatedBarber.blockedDates || []),
         })
-        .eq("id", updatedBarber.id);
+        .eq("id", updatedBarber.id)
+        .eq("tenant_id", tenantId);
       if (error) throw error;
       toast.success("Barbeiro atualizado no Supabase!");
       return;
@@ -392,7 +411,12 @@ export const updateBarber = async (updatedBarber: Barber): Promise<void> => {
 export const deleteBarber = async (id: string): Promise<void> => {
   if (isSupabaseConfigured) {
     try {
-      const { error } = await supabase.from("barbers").delete().eq("id", id);
+      const tenantId = getCurrentTenantId();
+      const { error } = await supabase
+        .from("barbers")
+        .delete()
+        .eq("id", id)
+        .eq("tenant_id", tenantId);
       if (error) throw error;
       toast.success("Barbeiro removido do Supabase!");
       return;
@@ -411,7 +435,11 @@ export const deleteBarber = async (id: string): Promise<void> => {
 export const getClients = async (): Promise<Client[]> => {
   if (isSupabaseConfigured) {
     try {
-      const { data, error } = await supabase.from("clients").select("*");
+      const tenantId = getCurrentTenantId();
+      const { data, error } = await supabase
+        .from("clients")
+        .select("*")
+        .eq("tenant_id", tenantId);
       if (error) throw error;
       return (data || []).map(mapClientFromDB);
     } catch (e) {
@@ -423,6 +451,7 @@ export const getClients = async (): Promise<Client[]> => {
 };
 
 export const addClient = async (name: string, phone: string, email?: string): Promise<Client> => {
+  const tenantId = getCurrentTenantId();
   const newClient: Client = {
     id: `c_${Date.now()}`,
     name,
@@ -437,6 +466,7 @@ export const addClient = async (name: string, phone: string, email?: string): Pr
       const { data: existing } = await supabase
         .from("clients")
         .select("*")
+        .eq("tenant_id", tenantId)
         .eq("phone", phone)
         .maybeSingle();
 
@@ -450,6 +480,7 @@ export const addClient = async (name: string, phone: string, email?: string): Pr
         phone: newClient.phone,
         email: newClient.email,
         registered_at: newClient.registeredAt,
+        tenant_id: tenantId,
       });
 
       if (error) throw error;
@@ -471,6 +502,7 @@ export const addClient = async (name: string, phone: string, email?: string): Pr
 export const updateClient = async (updatedClient: Client): Promise<void> => {
   if (isSupabaseConfigured) {
     try {
+      const tenantId = getCurrentTenantId();
       const { error } = await supabase
         .from("clients")
         .update({
@@ -478,7 +510,8 @@ export const updateClient = async (updatedClient: Client): Promise<void> => {
           phone: updatedClient.phone,
           email: updatedClient.email,
         })
-        .eq("id", updatedClient.id);
+        .eq("id", updatedClient.id)
+        .eq("tenant_id", tenantId);
       if (error) throw error;
       toast.success("Cliente atualizado no servidor!");
       return;
@@ -499,7 +532,12 @@ export const updateClient = async (updatedClient: Client): Promise<void> => {
 export const deleteClient = async (id: string): Promise<void> => {
   if (isSupabaseConfigured) {
     try {
-      const { error } = await supabase.from("clients").delete().eq("id", id);
+      const tenantId = getCurrentTenantId();
+      const { error } = await supabase
+        .from("clients")
+        .delete()
+        .eq("id", id)
+        .eq("tenant_id", tenantId);
       if (error) throw error;
       toast.success("Cliente excluído no servidor!");
       return;
@@ -518,9 +556,11 @@ export const deleteClient = async (id: string): Promise<void> => {
 export const getAppointments = async (): Promise<Appointment[]> => {
   if (isSupabaseConfigured) {
     try {
+      const tenantId = getCurrentTenantId();
       const { data, error } = await supabase
         .from("appointments")
         .select("*")
+        .eq("tenant_id", tenantId)
         .order("date", { ascending: false })
         .order("time", { ascending: false });
       if (error) throw error;
@@ -562,6 +602,7 @@ export const addAppointment = async (
 
   if (isSupabaseConfigured) {
     try {
+      const tenantId = getCurrentTenantId();
       const { error } = await supabase.from("appointments").insert({
         id: newApt.id,
         client_id: newApt.clientId,
@@ -576,6 +617,7 @@ export const addAppointment = async (
         time: newApt.time,
         status: newApt.status,
         created_at: newApt.createdAt,
+        tenant_id: tenantId,
       });
       if (error) throw error;
       toast.success("Agendamento efetuado no Supabase!");
@@ -648,10 +690,12 @@ export const updateAppointmentStatus = async (
 ): Promise<void> => {
   if (isSupabaseConfigured) {
     try {
+      const tenantId = getCurrentTenantId();
       const { error } = await supabase
         .from("appointments")
         .update({ status })
-        .eq("id", id);
+        .eq("id", id)
+        .eq("tenant_id", tenantId);
       if (error) throw error;
       
       if (status === "completed") {
@@ -707,11 +751,11 @@ export const resetLocalDB = async () => {
 
   if (isSupabaseConfigured) {
     try {
-      // Deleta TODOS os agendamentos no Supabase
+      // Deleta TODOS os agendamentos no Supabase para o tenant atual
       const { error } = await supabase
         .from("appointments")
         .delete()
-        .neq("id", "");
+        .eq("tenant_id", tenantId);
       if (error) throw error;
     } catch (e) {
       console.error("Erro ao limpar todos os agendamentos no Supabase no reset:", e);
@@ -728,9 +772,11 @@ export const resetLocalDB = async () => {
 export const deleteClientAppointments = async (clientPhone: string): Promise<void> => {
   if (isSupabaseConfigured) {
     try {
+      const tenantId = getCurrentTenantId();
       const { error } = await supabase
         .from("appointments")
         .delete()
+        .eq("tenant_id", tenantId)
         .eq("client_phone", clientPhone);
       if (error) throw error;
       toast.success("Histórico limpo no Supabase!");
