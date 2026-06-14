@@ -30,6 +30,8 @@ import {
   Appointment,
   DEFAULT_ADMIN_PHONE,
   resetLocalDB,
+  getBarberShopProfile,
+  type BarberShopProfile,
 } from "../lib/db";
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -54,6 +56,7 @@ function ClientDashboard() {
   const navigate = useNavigate();
   const [session, setSession] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"book" | "my-appointments">("book");
+  const [shopProfile, setShopProfile] = useState<BarberShopProfile | null>(null);
 
   // Load session
   useEffect(() => {
@@ -66,6 +69,9 @@ function ClientDashboard() {
       } else {
         tenant = window.localStorage.getItem("mbg_client_tenant") || "";
       }
+    }
+    if (tenant) {
+      getBarberShopProfile(tenant).then(setShopProfile);
     }
     const user = getCurrentUser();
     if (!user || user.role !== "client") {
@@ -94,11 +100,23 @@ function ClientDashboard() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white antialiased flex flex-col justify-between">
       {/* Top Navbar */}
-      <header className="border-b border-zinc-900 bg-zinc-950 sticky top-0 z-40 pt-[calc(28px+env(safe-area-inset-top,0px))] sm:pt-3 pb-3">
+      <header className="border-b border-zinc-900/60 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40 pt-[calc(28px+env(safe-area-inset-top,0px))] sm:pt-3 pb-3">
         <div className="mx-auto max-w-lg flex items-center justify-between px-4">
           <div className="flex items-center gap-2.5">
-            <BarberGoLogo className="w-8 h-8" />
-            <span className="text-sm font-extrabold tracking-tight">Meu Barbeiro <span className="text-amber-500">GO</span></span>
+            {shopProfile?.logoUrl ? (
+              <img
+                src={shopProfile.logoUrl}
+                alt={shopProfile.name}
+                className="w-8 h-8 rounded-full object-cover border border-amber-500/50 shadow-sm"
+              />
+            ) : (
+              <BarberGoLogo className="w-8 h-8" />
+            )}
+            <span className="text-sm font-extrabold tracking-tight">
+              {shopProfile ? shopProfile.name : (
+                <>Meu Barbeiro <span className="text-amber-500">GO</span></>
+              )}
+            </span>
           </div>
           <div className="flex items-center gap-2.5">
             <span className="text-xs text-zinc-400 font-medium">Olá, {session.name}</span>
@@ -120,7 +138,7 @@ function ClientDashboard() {
             onClick={() => setActiveTab("book")}
             className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition-all border ${
               activeTab === "book"
-                ? "bg-amber-500 text-zinc-950 border-amber-500 shadow-lg shadow-amber-500/10"
+                ? "bg-amber-500 text-zinc-950 border-amber-500 glow-emerald shadow-lg shadow-amber-500/10"
                 : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-white"
             }`}
           >
@@ -130,7 +148,7 @@ function ClientDashboard() {
             onClick={() => setActiveTab("my-appointments")}
             className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition-all border ${
               activeTab === "my-appointments"
-                ? "bg-amber-500 text-zinc-950 border-amber-500 shadow-lg shadow-amber-500/10"
+                ? "bg-amber-500 text-zinc-950 border-amber-500 glow-emerald shadow-lg shadow-amber-500/10"
                 : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-white"
             }`}
           >
@@ -142,7 +160,7 @@ function ClientDashboard() {
       {/* Main Content Area */}
       <main className="flex-1 mx-auto w-full max-w-lg px-4 py-4">
         {activeTab === "book" ? (
-          <BookingFlow clientPhone={session.phone} clientName={session.name} />
+          <BookingFlow clientPhone={session.phone} clientName={session.name} shopProfile={shopProfile} />
         ) : (
           <MyAppointments clientPhone={session.phone} />
         )}
@@ -156,9 +174,20 @@ function ClientDashboard() {
   );
 }
 
-// Logo Component matching the El Pastor Barber logo style in screenshots
-function PastorLogo() {
-  return <BarberGoLogo className="w-12 h-12" />;
+// Circular logo component for rendering either custom barbearia logo or Goiás themed default logo
+function ShopCircleLogo({ profile, className = "w-12 h-12" }: { profile: BarberShopProfile | null; className?: string }) {
+  if (profile?.logoUrl) {
+    return (
+      <div className={`relative flex items-center justify-center shrink-0 ${className}`}>
+        <img
+          src={profile.logoUrl}
+          alt={profile.name}
+          className="w-full h-full rounded-full object-cover border-2 border-amber-500 shadow-lg"
+        />
+      </div>
+    );
+  }
+  return <BarberGoLogo className={className} animate={false} />;
 }
 
 function LoaderComponent() {
@@ -176,11 +205,12 @@ function LoaderComponent() {
 interface BookingFlowProps {
   clientPhone: string;
   clientName: string;
+  shopProfile: BarberShopProfile | null;
 }
 
 type Step = "service" | "barber" | "datetime" | "confirm" | "success";
 
-function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
+function BookingFlow({ clientPhone, clientName, shopProfile }: BookingFlowProps) {
   const [step, setStep] = useState<Step>("service");
   const [services, setServices] = useState<Service[]>([]);
   const [barbers, setBarbers] = useState<Barber[]>([]);
@@ -194,7 +224,7 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
   const [selectedTime, setSelectedTime] = useState<string>(""); // HH:MM
   
   // Date configuration
-  const [days, setDays] = useState<{ label: string; dateStr: string; dayNum: string }[]>([]);
+  const [days, setDays] = useState<{ label: string; dateStr: string; dayNum: string; isAvailable: boolean }[]>([]);
   const [currentMonthYear, setCurrentMonthYear] = useState("");
   const [monthOffset, setMonthOffset] = useState(0);
 
@@ -453,7 +483,7 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
 
       {/* STEP 1: SERVICE SELECTION */}
       {step === "service" && (
-        <div>
+        <div className="animate-in fade-in slide-in-from-right-4 duration-300">
           <h2 className="text-sm font-bold text-zinc-300 mb-3 px-1 uppercase tracking-wider">Serviços</h2>
           <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
             {services.map((svc) => (
@@ -463,10 +493,10 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
                   setSelectedService(svc);
                   setStep("barber");
                 }}
-                className="w-full flex items-center justify-between bg-zinc-900/60 hover:bg-zinc-900 ring-1 ring-zinc-800/80 hover:ring-zinc-700 rounded-2xl p-3 text-left transition-all group active:scale-[0.99]"
+                className="w-full flex items-center justify-between bg-zinc-900/40 hover:bg-zinc-900/70 border border-zinc-800/60 hover:border-amber-500/30 rounded-2xl p-4 text-left transition-all group active:scale-[0.99] hover:scale-[1.01] hover:shadow-lg hover:shadow-amber-500/5"
               >
                 <div className="flex items-center gap-3">
-                  <PastorLogo />
+                  <ShopCircleLogo profile={shopProfile} />
                   <div>
                     <h3 className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors leading-tight">
                       {svc.name}
@@ -492,12 +522,12 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
 
       {/* STEP 2: BARBER SELECTION */}
       {step === "barber" && (
-        <div>
+        <div className="animate-in fade-in slide-in-from-right-4 duration-300">
           <h2 className="text-sm font-bold text-zinc-300 mb-3 uppercase tracking-wider">Escolha o Profissional</h2>
           
           {selectedService && (
-            <div className="mb-4 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-3 flex items-center gap-3">
-              <PastorLogo />
+            <div className="mb-4 bg-zinc-900/30 border border-zinc-800/40 rounded-xl p-3 flex items-center gap-3">
+              <ShopCircleLogo profile={shopProfile} />
               <div>
                 <p className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold">Serviço Selecionado</p>
                 <p className="text-xs font-bold text-white">{selectedService.name}</p>
@@ -514,10 +544,10 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
                   setSelectedBarber(barber);
                   setStep("datetime");
                 }}
-                className={`rounded-2xl p-4 text-center ring-1 transition-all active:scale-95 flex flex-col items-center ${
+                className={`rounded-2xl p-4 text-center border transition-all active:scale-95 hover:scale-[1.02] flex flex-col items-center ${
                   selectedBarber?.id === barber.id
-                    ? "bg-amber-500 text-zinc-950 ring-amber-400"
-                    : "bg-zinc-900/60 text-white ring-zinc-800 hover:ring-zinc-700"
+                    ? "bg-amber-500 text-zinc-950 border-amber-400 glow-emerald"
+                    : "bg-zinc-900/40 text-white border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/70"
                 }`}
               >
                 <img
@@ -544,11 +574,11 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
 
       {/* STEP 3: DATE & TIME */}
       {step === "datetime" && selectedService && selectedBarber && (
-        <div>
+        <div className="animate-in fade-in slide-in-from-right-4 duration-300">
           {/* Chosen Item Summary Card */}
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-3 flex items-center justify-between mb-4">
+          <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-3 flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <PastorLogo />
+              <ShopCircleLogo profile={shopProfile} />
               <div>
                 <h3 className="text-xs font-bold text-white">{selectedService.name}</h3>
                 <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 mt-0.5">
@@ -592,12 +622,12 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
                   setSelectedDate(d.dateStr);
                   setSelectedTime(""); // Reset time on date change
                 }}
-                className={`flex-col items-center justify-center p-3 rounded-2xl min-w-[70px] text-center transition-all border shrink-0 ${
+                className={`flex-col items-center justify-center p-3 rounded-2xl min-w-[70px] text-center transition-all border shrink-0 hover:scale-[1.02] ${
                   !d.isAvailable
                     ? "bg-zinc-950/20 text-zinc-700 border-zinc-950/10 cursor-not-allowed opacity-30"
                     : selectedDate === d.dateStr
-                    ? "bg-amber-500 text-zinc-950 border-amber-400 shadow-md animate-in fade-in"
-                    : "bg-zinc-900/60 text-white border-zinc-800 hover:border-zinc-700"
+                    ? "bg-amber-500 text-zinc-950 border-amber-400 glow-emerald shadow-md"
+                    : "bg-zinc-900/40 text-white border-zinc-800 hover:border-zinc-700"
                 }`}
               >
                 <p className="text-[10px] font-bold opacity-60 uppercase">{d.label}</p>
@@ -651,12 +681,12 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
                       key={time}
                       disabled={isOccupied}
                       onClick={() => setSelectedTime(time)}
-                      className={`py-2 text-center text-[10px] font-black rounded-lg transition-all border ${
+                      className={`py-2 text-center text-[10px] font-black rounded-lg transition-all border hover:scale-[1.02] ${
                         selectedTime === time
-                          ? "bg-amber-500 text-zinc-950 border-amber-400 shadow-md"
+                          ? "bg-amber-500 text-zinc-950 border-amber-400 glow-emerald shadow-md"
                           : isOccupied
                           ? "bg-zinc-900/20 text-zinc-700 line-through border-zinc-900/10 cursor-not-allowed"
-                          : "bg-zinc-900/60 text-white border-zinc-800 hover:border-zinc-700"
+                          : "bg-zinc-900/40 text-white border-zinc-800 hover:border-zinc-700"
                       }`}
                     >
                       {time}
@@ -694,12 +724,12 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
 
       {/* STEP 4: FINAL CONFIRMATION */}
       {step === "confirm" && selectedService && selectedBarber && (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
           <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">Confirme seu Agendamento</h2>
           
-          <div className="bg-zinc-900/60 ring-1 ring-zinc-800 rounded-2xl p-5 space-y-4">
+          <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-2xl p-5 space-y-4 shadow-xl shadow-black/20">
             <div className="flex items-center gap-3 pb-3 border-b border-zinc-800">
-              <PastorLogo />
+              <ShopCircleLogo profile={shopProfile} />
               <div>
                 <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Serviço</p>
                 <h3 className="text-sm font-bold text-white">{selectedService.name}</h3>
@@ -762,7 +792,7 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
 
       {/* STEP 5: SUCCESS RECEIPT */}
       {step === "success" && selectedService && selectedBarber && (
-        <div className="text-center py-6">
+        <div className="text-center py-6 animate-in zoom-in-95 duration-300">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 ring-2 ring-emerald-500/20 mb-4 animate-bounce">
             <CheckCircle2 className="h-8 w-8" />
           </div>
@@ -772,15 +802,23 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
             Seu horário foi agendado e enviado para a barbearia. Te esperamos lá!
           </p>
 
-          <div className="bg-zinc-900 ring-1 ring-zinc-800 rounded-3xl p-5 my-6 text-left relative overflow-hidden">
-            {/* Ticket teeth decorations */}
-            <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-zinc-950" />
-            <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-zinc-950" />
+          <div className="bg-zinc-900/60 border border-amber-500/20 rounded-3xl p-5 my-6 text-left relative overflow-hidden holo-card glow-gold shadow-2xl">
+            {/* Holographic glowing backdrops */}
+            <div className="absolute -left-12 -top-12 w-24 h-24 rounded-full bg-amber-500/10 blur-2xl pointer-events-none" />
+            <div className="absolute -right-12 -bottom-12 w-24 h-24 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
             
-            <div className="text-center pb-4 border-b border-dashed border-zinc-800">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Comprovante de Reserva</span>
-              <p className="text-xl font-mono text-amber-400 font-extrabold mt-1">{selectedTime}</p>
-              <p className="text-xs text-zinc-400">
+            {/* Ticket teeth decorations */}
+            <div className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-zinc-950 border-r border-zinc-900" />
+            <div className="absolute -right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-zinc-950 border-l border-zinc-900" />
+            
+            <div className="text-center pb-5 border-b border-dashed border-zinc-800/80">
+              <span className="text-[10px] text-amber-400 uppercase tracking-widest font-black flex items-center justify-center gap-1.5 animate-pulse">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                Comprovante de Reserva VIP
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+              </span>
+              <p className="text-2xl font-mono text-white font-extrabold mt-2 tracking-wide glow-gold-sm">{selectedTime}</p>
+              <p className="text-xs text-zinc-400 font-medium">
                 {new Date(selectedDate + "T12:00:00").toLocaleDateString("pt-BR", {
                   weekday: "long",
                   day: "2-digit",
@@ -789,22 +827,26 @@ function BookingFlow({ clientPhone, clientName }: BookingFlowProps) {
               </p>
             </div>
 
-            <div className="space-y-2.5 pt-4 text-xs font-mono">
+            <div className="space-y-3 pt-5 text-xs font-mono text-zinc-300">
+              <div className="flex justify-between">
+                <span className="text-zinc-500">ESTABELECIMENTO:</span>
+                <span className="text-white font-extrabold uppercase">{shopProfile?.name || "Meu Barbeiro GO"}</span>
+              </div>
               <div className="flex justify-between">
                 <span className="text-zinc-500">SERVIÇO:</span>
-                <span className="text-white font-bold">{selectedService.name}</span>
+                <span className="text-white font-extrabold">{selectedService.name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-500">VALOR:</span>
-                <span className="text-sky-400 font-bold">{formatPrice(selectedService.price)}</span>
+                <span className="text-amber-400 font-extrabold">{formatPrice(selectedService.price)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-500">PROFISSIONAL:</span>
-                <span className="text-white font-bold">{selectedBarber.name}</span>
+                <span className="text-white font-extrabold">{selectedBarber.name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-500">CLIENTE:</span>
-                <span className="text-white font-bold">{clientName}</span>
+                <span className="text-white font-extrabold">{clientName}</span>
               </div>
             </div>
           </div>

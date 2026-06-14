@@ -180,3 +180,78 @@
     touch-action: pan-x;
   }
 }
+
+/* 
+ * Custom Surreal Luxury Theme Utilities
+ * Inspired by VIP lounge designs, combining obsidian black, emerald, and gold.
+ */
+.glass-card {
+  background: rgba(12, 12, 14, 0.72) !important;
+  backdrop-filter: blur(20px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.055) !important;
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6) !important;
+}
+
+.glow-emerald {
+  box-shadow: 0 0 20px rgba(74, 222, 128, 0.18) !important;
+}
+
+.glow-gold {
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.18) !important;
+}
+
+.glow-emerald-sm {
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.1) !important;
+}
+
+.glow-gold-sm {
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.1) !important;
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #FFF9C4 0%, #FFD54F 50%, #FFB300 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 45%, #fbbf24 100%) !important;
+  color: #0c0c0e !important;
+}
+
+.bg-emerald-gradient {
+  background: linear-gradient(135deg, #047857 0%, #10b981 100%) !important;
+  color: #0c0c0e !important;
+}
+
+/* Custom animation for ticket holographic shine */
+@keyframes holoShine {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.holo-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.holo-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(125deg, 
+    transparent 0%, 
+    transparent 35%, 
+    rgba(255, 255, 255, 0.03) 40%, 
+    rgba(255, 255, 255, 0.08) 45%, 
+    rgba(255, 255, 255, 0.03) 50%, 
+    transparent 55%, 
+    transparent 100%
+  );
+  background-size: 200% 200%;
+  animation: holoShine 8s ease infinite;
+  pointer-events: none;
+}
+

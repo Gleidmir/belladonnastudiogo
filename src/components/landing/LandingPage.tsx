@@ -425,18 +425,20 @@ export function LandingPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(245,158,11,0.08),transparent_50%)]" />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
           <div className="flex flex-col items-center text-center">
-            <span className="inline-flex items-center rounded-full bg-zinc-900 px-3 py-1 text-xs font-bold text-amber-400 ring-1 ring-amber-500/20">
-              🔥 OFERTA DE LANÇAMENTO: 30 DIAS GRÁTIS
-            </span>
-            <h1 className="mt-6 text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.15] sm:leading-[1.05] tracking-tight max-w-4xl">
-              Sua Barbearia no <span className="text-amber-400">Piloto Automático</span>.
-              O Controle Total do Seu Faturamento na Palma da Mão.
+            {/* Logo circular e Nome do App em letras maiúsculas */}
+            <div className="flex flex-col items-center justify-center mb-6">
+              <div className="relative p-2.5 rounded-full bg-zinc-950/40 ring-1 ring-zinc-800/80 shadow-2xl drop-shadow-[0_0_25px_rgba(74,222,128,0.2)]">
+                <BarberGoLogo className="w-32 h-32 md:w-36 md:h-36" animate={false} />
+              </div>
+              <h2 className="mt-5 text-3xl sm:text-4xl md:text-5xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400">
+                MEU BARBEIRO GO
+              </h2>
+            </div>
+
+            {/* Apenas a frase solicitada pelo usuário */}
+            <h1 className="text-xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-amber-400 mb-8">
+              Sua Barbearia no Piloto Automático
             </h1>
-            <p className="mt-6 text-base sm:text-lg text-zinc-400 leading-relaxed max-w-2xl">
-              Elimine o caos das mensagens de WhatsApp. Deixe que o{" "}
-              <span className="font-semibold text-white">Meu Barbeiro GO</span> agende seus clientes
-              sozinhos enquanto você lucra mais e monitora tudo em tempo real.
-            </p>
 
             <div className="mt-8 w-full max-w-md">
               <SignupCard />

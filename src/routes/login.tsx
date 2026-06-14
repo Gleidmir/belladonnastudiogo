@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { ShieldAlert, ArrowLeft, Loader2, Phone, User, Mail, Lock } from "lucide-react";
 import { BarberGoLogo } from "../components/ui/logo";
 import { toast } from "sonner";
-import { getCurrentUser, setCurrentUser, addClient, logout } from "../lib/db";
+import { getCurrentUser, setCurrentUser, addClient, logout, getBarberShopProfile } from "../lib/db";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
 export const Route = createFileRoute("/login")({
@@ -25,6 +25,7 @@ function LoginPage() {
   const [activeTab, setActiveTab] = useState<"client" | "admin">("client");
   const [loading, setLoading] = useState(false);
   const [isClientOnly, setIsClientOnly] = useState(false);
+  const [shopProfile, setShopProfile] = useState<any>(null);
 
   // Client form state
   const [clientName, setClientName] = useState("");
@@ -50,8 +51,13 @@ function LoginPage() {
           window.localStorage.setItem("mbg_client_tenant", tenant);
           setIsClientOnly(true);
           setActiveTab("client");
+          getBarberShopProfile(tenant).then(setShopProfile);
         } else {
           setIsClientOnly(false);
+          const storedTenant = window.localStorage.getItem("mbg_client_tenant");
+          if (storedTenant) {
+            getBarberShopProfile(storedTenant).then(setShopProfile);
+          }
         }
       }
     }
@@ -183,24 +189,40 @@ function LoginPage() {
 
       {/* Main card */}
       <main className="flex-1 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md bg-zinc-900/60 ring-1 ring-zinc-800 rounded-3xl p-8 backdrop-blur-md shadow-2xl">
+        <div className={`w-full max-w-md glass-card rounded-3xl p-8 shadow-2xl transition-all duration-500 ${
+          activeTab === "client" ? "glow-emerald" : "glow-gold"
+        }`}>
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <BarberGoLogo className="w-16 h-16 mb-3 animate-pulse" />
-            <h1 className="text-2xl font-extrabold tracking-tight">Meu Barbeiro <span className="text-amber-500">GO</span></h1>
-            <p className="text-zinc-500 text-xs mt-1">
+            {shopProfile?.logoUrl ? (
+              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-amber-500 mb-3 flex items-center justify-center bg-zinc-900 shadow-xl shrink-0">
+                <img
+                  src={shopProfile.logoUrl}
+                  alt={shopProfile.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <BarberGoLogo className="w-16 h-16 mb-3 animate-pulse" />
+            )}
+            <h1 className="text-2xl font-extrabold tracking-tight">
+              {shopProfile ? shopProfile.name : (
+                <>Meu Barbeiro <span className="text-amber-500">GO</span></>
+              )}
+            </h1>
+            <p className="text-zinc-500 text-xs mt-1 text-center">
               {isClientOnly ? "Identifique-se para Agendar seu Horário" : "Selecione como deseja acessar"}
             </p>
           </div>
  
           {/* Role selection tab */}
           {!isClientOnly && (
-            <div className="flex rounded-xl bg-zinc-950/80 p-1 ring-1 ring-zinc-800 mb-6">
+            <div className="flex rounded-xl bg-zinc-950/50 p-1 border border-zinc-800 mb-6">
               <button
                 type="button"
                 onClick={() => setActiveTab("client")}
-                className={`flex-1 rounded-lg py-2.5 text-xs font-bold transition-all ${
-                  activeTab === "client" ? "bg-amber-500 text-zinc-950 shadow-md" : "text-zinc-400 hover:text-white"
+                className={`flex-1 rounded-lg py-2.5 text-xs font-black transition-all ${
+                  activeTab === "client" ? "bg-amber-500 text-zinc-950 shadow-md glow-emerald-sm" : "text-zinc-400 hover:text-white"
                 }`}
               >
                 Sou Cliente
@@ -208,8 +230,8 @@ function LoginPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("admin")}
-                className={`flex-1 rounded-lg py-2.5 text-xs font-bold transition-all ${
-                  activeTab === "admin" ? "bg-amber-500 text-zinc-950 shadow-md" : "text-zinc-400 hover:text-white"
+                className={`flex-1 rounded-xl py-2.5 text-xs font-black transition-all ${
+                  activeTab === "admin" ? "bg-gold-gradient text-zinc-950 shadow-md glow-gold-sm" : "text-zinc-400 hover:text-white"
                 }`}
               >
                 Sou Barbeiro / ADM
@@ -272,7 +294,7 @@ function LoginPage() {
                     value={adminEmail}
                     onChange={(e) => setAdminEmail(e.target.value)}
                     placeholder="admin@barberboss.com"
-                    className="w-full rounded-xl bg-zinc-950/90 pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all"
+                    className="w-full rounded-xl bg-zinc-950/90 pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-[#fbbf24] focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -287,19 +309,17 @@ function LoginPage() {
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
                     placeholder="••••••"
-                    className="w-full rounded-xl bg-zinc-950/90 pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all"
+                    className="w-full rounded-xl bg-zinc-950/90 pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-[#fbbf24] focus:outline-none transition-all"
                   />
                 </div>
               </div>
 
-
-
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-xl bg-amber-500 py-3.5 text-sm font-bold tracking-wide text-zinc-950 hover:bg-amber-400 active:scale-95 transition-all shadow-lg shadow-amber-500/10 flex items-center justify-center gap-2 mt-2"
+                className="w-full rounded-xl bg-gold-gradient py-3.5 text-sm font-bold tracking-wide hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-amber-500/10 flex items-center justify-center gap-2 mt-2"
               >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "ENTRAR NO PAINEL →"}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin text-zinc-950" /> : "ENTRAR NO PAINEL →"}
               </button>
             </form>
           )}

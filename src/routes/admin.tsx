@@ -26,6 +26,7 @@ import {
   Lock,
   KeyRound,
   RefreshCw,
+  Store,
 } from "lucide-react";
 import {
   AreaChart,
@@ -41,6 +42,7 @@ import {
 import { toast } from "sonner";
 import {
   getCurrentUser,
+  setCurrentUser,
   logout,
   getAppointments,
   getClients,
@@ -65,6 +67,9 @@ import {
   checkSubscriptionStatus,
   activateSubscription,
   getTenantConfig,
+  getBarberShopProfile,
+  updateBarberShopProfile,
+  type BarberShopProfile,
 } from "../lib/db";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
@@ -103,7 +108,7 @@ export const Route = createFileRoute("/admin")({
 function AdminDashboard() {
   const navigate = useNavigate();
   const [session, setSession] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "agenda" | "clientes" | "servicos" | "barbeiros">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "agenda" | "clientes" | "servicos" | "barbeiros" | "perfil">("dashboard");
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -161,6 +166,12 @@ function AdminDashboard() {
   const [services, setServices] = useState<Service[]>([]);
   const [barbers, setBarbers] = useState<Barber[]>([]);
 
+  // States for Barber Shop Profile
+  const [shopProfile, setShopProfile] = useState<BarberShopProfile | null>(null);
+  const [shopName, setShopName] = useState("");
+  const [shopLogoUrl, setShopLogoUrl] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+
   // Search filters
   const [clientSearch, setClientSearch] = useState("");
   const [agendaFilter, setAgendaFilter] = useState<"all" | "pending" | "completed" | "cancelled">("all");
@@ -199,6 +210,12 @@ function AdminDashboard() {
           navigate({ to: "/login" });
           return;
         }
+        // Save session locally to support getCurrentUser() and getCurrentTenantId()
+        setCurrentUser({
+          role: "admin",
+          name: session.user?.user_metadata?.name || "Barbeiro Administrador",
+          email: session.user?.email || "",
+        });
         setSession(session.user);
       } else {
         const user = getCurrentUser();
@@ -233,18 +250,29 @@ function AdminDashboard() {
   const loadAllData = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
     try {
-      const [s, a, c, svcs, barbs] = await Promise.all([
+      const localUser = getCurrentUser();
+      const tenantEmail = isSupabaseConfigured
+        ? (await supabase.auth.getSession()).data.session?.user?.email || "default"
+        : localUser?.email || "default";
+
+      const [s, a, c, svcs, barbs, prof] = await Promise.all([
         getDashboardStats(),
         getAppointments(),
         getClients(),
         getServices(),
         getBarbers(),
+        getBarberShopProfile(tenantEmail),
       ]);
       setStats(s);
       setAppointments(a);
       setClients(c);
       setServices(svcs);
       setBarbers(barbs);
+      if (prof) {
+        setShopProfile(prof);
+        setShopName(prof.name);
+        setShopLogoUrl(prof.logoUrl || "");
+      }
     } catch (e) {
       console.error("Erro ao carregar dados no admin:", e);
       if (!isSilent) toast.error("Erro ao sincronizar dados do servidor.");
@@ -724,14 +752,15 @@ function AdminDashboard() {
             { id: "clientes" as const, label: "Clientes Cadastrados", icon: Users },
             { id: "servicos" as const, label: "Gerenciar Serviços", icon: Layers },
             { id: "barbeiros" as const, label: "Gerenciar Barbeiros", icon: Scissors },
+            { id: "perfil" as const, label: "Minha Barbearia", icon: Store },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`w-full flex items-center justify-between rounded-xl px-4 py-3 text-xs font-bold transition-all border ${
                 activeTab === tab.id
-                  ? "bg-amber-500 text-zinc-950 border-amber-500 shadow-lg shadow-amber-500/10"
-                  : "bg-zinc-900/40 text-zinc-400 border-zinc-900 hover:text-white hover:bg-zinc-900/80"
+                  ? "bg-gold-gradient text-zinc-950 border-transparent shadow-lg glow-gold-sm font-black"
+                  : "bg-zinc-900/40 text-zinc-400 border-zinc-900/40 hover:text-white hover:bg-zinc-800/60"
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -779,7 +808,11 @@ function AdminDashboard() {
                     <Copy className="h-4 w-4" /> Copiar Link
                   </button>
                   <a
-                    href={`https://wa.me/?text=${encodeURIComponent(`Olá! Agende seu horário na nossa barbearia online pelo link: ${typeof window !== "undefined" ? window.location.origin : ""}/client?t=${session?.email || "default"}`)}`}
+                    href={`https://wa.me/?text=${encodeURIComponent(
+                      shopName
+                        ? `Olá! Agende seu horário na barbearia ${shopName} online pelo link: ${typeof window !== "undefined" ? window.location.origin : ""}/client?t=${session?.email || "default"}`
+                        : `Olá! Agende seu horário na nossa barbearia online pelo link: ${typeof window !== "undefined" ? window.location.origin : ""}/client?t=${session?.email || "default"}`
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl bg-green-600 hover:bg-green-500 text-white px-4 py-2.5 text-xs font-bold transition-all shadow shadow-green-500/10 cursor-pointer active:scale-95"
@@ -799,7 +832,7 @@ function AdminDashboard() {
                   { label: "Clientes Cadastrados", value: stats.registeredClients, icon: Users, trend: "Total histórico", color: "text-purple-400" },
                   { label: "Serviços Realizados", value: stats.completedServices, icon: CalendarCheck, trend: "Finalizados", color: "text-pink-400" },
                 ].map((kpi) => (
-                  <div key={kpi.label} className="bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl p-5 hover:ring-zinc-800 transition-all flex flex-col justify-between">
+                  <div key={kpi.label} className="glass-card rounded-2xl p-5 hover:scale-[1.02] hover:glow-gold-sm transition-all duration-300 flex flex-col justify-between">
                     <div className="flex justify-between items-start">
                       <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{kpi.label}</span>
                       <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
@@ -817,7 +850,7 @@ function AdminDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-w-0 overflow-hidden">
                   
                   {/* Revenue History Chart */}
-                  <div className="bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl p-5 min-w-0 overflow-hidden">
+                  <div className="glass-card rounded-2xl p-5 min-w-0 overflow-hidden hover:glow-emerald-sm transition-all duration-300">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-4">Evolução do Faturamento (Histórico 12 Meses)</h3>
                     <div className="h-64 min-w-0 overflow-hidden">
                       <ResponsiveContainer width="100%" height="100%">
@@ -842,7 +875,7 @@ function AdminDashboard() {
                   </div>
 
                   {/* Barber Performance Chart */}
-                  <div className="bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl p-5 min-w-0 overflow-hidden">
+                  <div className="glass-card rounded-2xl p-5 min-w-0 overflow-hidden hover:glow-gold-sm transition-all duration-300">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-4">Desempenho por Barbeiro (Faturamento)</h3>
                     <div className="h-64 min-w-0 overflow-hidden">
                       <ResponsiveContainer width="100%" height="100%">
@@ -864,7 +897,7 @@ function AdminDashboard() {
               )}
 
               {/* Service Popularity Grid */}
-              <div className="bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl p-5">
+              <div className="glass-card rounded-2xl p-5 hover:glow-emerald-sm transition-all duration-300">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-4">Serviços Mais Procurados (Top 5)</h3>
                 <div className="space-y-3">
                   {stats.servicePopularity.map((svc: any, idx: number) => {
@@ -897,7 +930,7 @@ function AdminDashboard() {
           {/* TAB 2: AGENDA / APPOINTMENTS */}
           {activeTab === "agenda" && (
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glass-card rounded-2xl p-4">
                 <div>
                   <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">Controle de Horários</h2>
                   <p className="text-[11px] text-zinc-500 mt-0.5">Gerencie os atendimentos agendados pelos clientes.</p>
@@ -915,7 +948,7 @@ function AdminDashboard() {
                       key={f.id}
                       onClick={() => setAgendaFilter(f.id)}
                       className={`rounded px-2.5 py-1.5 text-[10px] font-black transition-all ${
-                        agendaFilter === f.id ? "bg-amber-500 text-zinc-950 font-bold" : "text-zinc-400 hover:text-white"
+                        agendaFilter === f.id ? "bg-gold-gradient text-zinc-950 font-bold shadow-md glow-gold-sm" : "text-zinc-400 hover:text-white"
                       }`}
                     >
                       {f.label}
@@ -934,7 +967,7 @@ function AdminDashboard() {
                   filteredAppointments.slice(0, 100).map((apt) => (
                     <div
                       key={apt.id}
-                      className="bg-zinc-900/60 ring-1 ring-zinc-900 hover:ring-zinc-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all"
+                      className="glass-card hover:scale-[1.01] hover:glow-emerald-sm rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300"
                     >
                       <div className="flex items-start gap-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-950 border border-zinc-800 text-amber-500">
@@ -1020,7 +1053,7 @@ function AdminDashboard() {
           {/* TAB 3: CLIENTS */}
           {activeTab === "clientes" && (
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glass-card rounded-2xl p-4">
                 <div>
                   <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">Clientes Cadastrados</h2>
                   <p className="text-[11px] text-zinc-500 mt-0.5">Veja a lista de clientes cadastrados no sistema.</p>
@@ -1060,7 +1093,7 @@ function AdminDashboard() {
               {showClientForm && (
                 <form
                   onSubmit={handleClientSubmit}
-                  className="bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl p-5 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200"
+                  className="glass-card rounded-2xl p-5 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200"
                 >
                   <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
                     {editingClient ? "Editar Cliente" : "Cadastrar Novo Cliente"}
@@ -1128,7 +1161,7 @@ function AdminDashboard() {
               )}
 
               {/* Clients Table */}
-              <div className="bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl overflow-hidden">
+              <div className="glass-card rounded-2xl overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
@@ -1206,7 +1239,7 @@ function AdminDashboard() {
           {/* TAB 4: GERENCIAR SERVIÇOS */}
           {activeTab === "servicos" && (
             <div className="space-y-4">
-              <div className="flex justify-between items-center bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl p-4">
+              <div className="flex justify-between items-center glass-card rounded-2xl p-4">
                 <div>
                   <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">Gerenciador de Serviços</h2>
                   <p className="text-[11px] text-zinc-500 mt-0.5">Configure os serviços disponíveis para agendamento dos clientes.</p>
@@ -1231,7 +1264,7 @@ function AdminDashboard() {
               {showServiceForm && (
                 <form
                   onSubmit={handleServiceSubmit}
-                  className="bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl p-5 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200"
+                  className="glass-card rounded-2xl p-5 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200"
                 >
                   <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
                     {editingService ? "Editar Serviço" : "Cadastrar Novo Serviço"}
@@ -1302,8 +1335,8 @@ function AdminDashboard() {
                 {services.map((svc) => (
                   <div
                     key={svc.id}
-                    className={`bg-zinc-900/60 ring-1 rounded-2xl p-4 flex justify-between items-start transition-all ${
-                      svc.isActive === false ? "ring-zinc-950/40 opacity-50" : "ring-zinc-900 hover:ring-zinc-800"
+                    className={`glass-card rounded-2xl p-4 flex justify-between items-start transition-all duration-300 ${
+                      svc.isActive === false ? "opacity-50" : "hover:scale-[1.01] hover:glow-emerald-sm"
                     }`}
                   >
                     <div>
@@ -1356,7 +1389,7 @@ function AdminDashboard() {
           {/* TAB 5: GERENCIAR BARBEIROS */}
           {activeTab === "barbeiros" && (
             <div className="space-y-4">
-              <div className="flex justify-between items-center bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl p-4">
+              <div className="flex justify-between items-center glass-card rounded-2xl p-4">
                 <div>
                   <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">Gerenciador de Barbeiros</h2>
                   <p className="text-[11px] text-zinc-500 mt-0.5">Adicione, edite ou remova profissionais da sua barbearia.</p>
@@ -1381,7 +1414,7 @@ function AdminDashboard() {
               {showBarberForm && (
                 <form
                   onSubmit={handleBarberSubmit}
-                  className="bg-zinc-900/60 ring-1 ring-zinc-900 rounded-2xl p-5 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200"
+                  className="glass-card rounded-2xl p-5 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200"
                 >
                   <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
                     {editingBarber ? "Editar Barbeiro" : "Cadastrar Novo Barbeiro"}
@@ -1523,7 +1556,7 @@ function AdminDashboard() {
                 {barbers.map((barber) => (
                   <div
                     key={barber.id}
-                    className="bg-zinc-900/60 ring-1 ring-zinc-900 hover:ring-zinc-800 rounded-2xl p-4 flex justify-between items-center transition-all"
+                    className="glass-card hover:scale-[1.01] hover:glow-emerald-sm rounded-2xl p-4 flex justify-between items-center transition-all duration-300"
                   >
                     <div className="flex items-center gap-3">
                       <img
@@ -1587,6 +1620,130 @@ function AdminDashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: PROFILE */}
+          {activeTab === "perfil" && (
+            <div className="space-y-6 animate-fade-in text-left">
+              <div className="space-y-1">
+                <h2 className="text-xl font-extrabold text-white">Minha Barbearia</h2>
+                <p className="text-xs text-zinc-400">
+                  Personalize as informações de visualização da sua barbearia para seus clientes.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Form Column */}
+                <div className="md:col-span-2 glass-card rounded-3xl p-6 space-y-4">
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!shopName.trim()) {
+                        toast.error("Por favor, preencha o nome da barbearia.");
+                        return;
+                      }
+                      setSavingProfile(true);
+                      try {
+                        const localUser = getCurrentUser();
+                        const tenantEmail = isSupabaseConfigured
+                          ? (await supabase.auth.getSession()).data.session?.user?.email || "default"
+                          : localUser?.email || "default";
+
+                        await updateBarberShopProfile({
+                          tenantId: tenantEmail,
+                          name: shopName,
+                          logoUrl: shopLogoUrl.trim() || undefined,
+                        });
+                        await loadAllData();
+                      } catch (error) {
+                        console.error(error);
+                      } finally {
+                        setSavingProfile(false);
+                      }
+                    }}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nome da Barbearia</label>
+                      <input
+                        type="text"
+                        required
+                        value={shopName}
+                        onChange={(e) => setShopName(e.target.value)}
+                        placeholder="Ex: El Pastor Barbearia"
+                        className="w-full rounded-xl bg-zinc-950/90 px-4 py-3.5 text-sm text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all mt-1.5"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Link do Logotipo / Imagem (URL)</label>
+                      <input
+                        type="url"
+                        value={shopLogoUrl}
+                        onChange={(e) => setShopLogoUrl(e.target.value)}
+                        placeholder="Ex: https://link-da-imagem.com/logo.png"
+                        className="w-full rounded-xl bg-zinc-950/90 px-4 py-3.5 text-sm text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all mt-1.5"
+                      />
+                      <p className="text-[10px] text-zinc-500 mt-1.5 leading-relaxed">
+                        Copie e cole o endereço/link de uma foto pública (do Instagram, Facebook, Imgur, Postimages, etc.). Se não colocar nenhuma imagem, será usada a logo temática padrão de Goiás.
+                      </p>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={savingProfile}
+                      className="w-full rounded-xl bg-amber-500 py-3.5 text-xs font-bold tracking-wide text-zinc-950 hover:bg-amber-400 active:scale-95 transition-all shadow-lg shadow-amber-500/10 flex items-center justify-center gap-2 mt-2"
+                    >
+                      {savingProfile ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                          <span>Salvando...</span>
+                        </>
+                      ) : (
+                        <span>SALVAR CONFIGURAÇÕES</span>
+                      )}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Live Preview Column */}
+                <div className="glass-card rounded-3xl p-6 flex flex-col items-center justify-center text-center space-y-4 glow-emerald-sm">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Visualização do Cliente</span>
+                  
+                  {/* Phone Mockup Header Section */}
+                  <div className="w-full max-w-[240px] glass-card rounded-2xl p-5 shadow-xl glow-emerald-sm">
+                    <div className="flex flex-col items-center space-y-3">
+                      {/* Circle styled logo container */}
+                      <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-amber-500 flex items-center justify-center bg-zinc-900/50 shadow-inner shrink-0">
+                        {shopLogoUrl.trim() ? (
+                          <img
+                            src={shopLogoUrl}
+                            alt="Logo Barbearia"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback inside image on load error
+                              (e.target as any).src = "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=100&h=100&fit=crop";
+                            }}
+                          />
+                        ) : (
+                          <BarberGoLogo className="w-16 h-16 scale-110" animate={false} />
+                        )}
+                      </div>
+                      <div className="text-center w-full">
+                        <h3 className="text-xs font-black text-white truncate max-w-full">
+                          {shopName.trim() || "Minha Barbearia"}
+                        </h3>
+                        <span className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider mt-0.5 block">Meu Barbeiro GO</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-zinc-500 leading-relaxed max-w-[200px]">
+                    Este é o cabeçalho que seus clientes verão ao abrir o aplicativo pelo celular para agendar serviços.
+                  </p>
+                </div>
               </div>
             </div>
           )}

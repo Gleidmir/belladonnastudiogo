@@ -142,3 +142,20 @@ INSERT INTO public.services (id, name, price, duration, is_active) VALUES
 ('s13', 'Cabelo + Bigode + Sobrancelha', 50.00, 50, true),
 ('s14', 'Cabelo + Pigmentação', 70.00, 50, true)
 ON CONFLICT (id) DO NOTHING;
+
+
+-- 5. Tabela de Perfis de Barbearias (Tenant Profiles)
+CREATE TABLE IF NOT EXISTS public.barber_shops (
+    tenant_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    logo_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Habilitar RLS para Perfis de Barbearias (Leitura pública, escrita autenticada pelo respectivo admin)
+ALTER TABLE public.barber_shops ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Leitura pública de perfis" ON public.barber_shops FOR SELECT USING (true);
+CREATE POLICY "Escrita de perfis para admins" ON public.barber_shops FOR ALL TO authenticated 
+    USING (tenant_id = (auth.jwt() ->> 'email'::text))
+    WITH CHECK (tenant_id = (auth.jwt() ->> 'email'::text));
+

@@ -3,71 +3,139 @@ export function BarberGoLogo({ className = "w-12 h-12", animate = true }: { clas
     <div className={`relative flex items-center justify-center ${animate ? "animate-pulse" : ""} ${className}`}>
       <svg
         viewBox="0 0 100 100"
-        className="w-full h-full drop-shadow-[0_0_12px_rgba(74,222,128,0.4)]"
+        className="w-full h-full drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Double border gold container */}
-        <rect
-          x="3"
-          y="3"
-          width="94"
-          height="94"
-          rx="24"
-          stroke="url(#goldGradient)"
-          strokeWidth="4"
-          fill="#09090b"
-        />
-        <rect
-          x="8"
-          y="8"
-          width="84"
-          height="84"
-          rx="19"
-          stroke="url(#goldGradient)"
-          strokeWidth="1.5"
-          fill="none"
-          opacity="0.5"
-        />
+        {/* Definition of Gradients, Filters, and Stars */}
+        <defs>
+          {/* Green flag gradient */}
+          <linearGradient id="goiasGreen" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#007F3D" />
+            <stop offset="100%" stopColor="#005C2B" />
+          </linearGradient>
 
-        {/* Barber silhouette facing right */}
-        <g transform="translate(14, 15)">
-          {/* Hair back & top */}
-          <path
-            d="M20,13 C26,7 34,7 40,10 C46,13 48,18 47,24 C44,24 41,22 39,20 C36,18 32,18 29,20 C27,21 26,24 28,26 C29,27 32,27 34,26 C36,25 38,26 38,28 C38,30 35,32 32,32 C28,32 25,30 24,28 C23,27 21,27 20,29 C18,31 18,34 20,36 C22,38 25,38 27,37 C29,36 31,37 31,39 C31,41 28,43 25,43 C20,43 17,40 16,36 C15,35 13,35 12,37 C10,39 10,42 12,44 C14,46 17,46 19,45 C21,44 23,45 23,47 C23,49 20,51 17,51 C11,51 8,46 8,40 C8,34 11,28 15,24 C14,20 16,16 20,13 Z"
-            fill="url(#goldGradient)"
-          />
-          {/* Face and Beard */}
-          <path
-            d="M32,26 C35,26 38,28 39,31 C40,34 39,37 37,39 C36,40 37,42 39,43 C42,44 45,46 45,49 C45,52 42,54 39,54 L34,54 C35,56 36,58 35,60 C34,62 31,61 30,59 C29,60 28,61 27,61 C26,61 25,59 25,57 C23,58 22,58 21,57 C20,55 21,52 22,51 C23,49 23,47 22,46 C19,44 18,39 19,34"
-            fill="url(#goldGradient)"
-          />
-          {/* Speed / Hair lines */}
-          <path d="M5,16 L12,16 M2,24 L10,24 M4,32 L9,32" stroke="url(#goldGradient)" strokeWidth="2.5" strokeLinecap="round" />
+          {/* Yellow flag gradient */}
+          <linearGradient id="goiasYellow" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FFD200" />
+            <stop offset="100%" stopColor="#E5BD00" />
+          </linearGradient>
+
+          {/* Blue canton gradient */}
+          <linearGradient id="goiasBlue" x1="0" y1="0" x2="50" y2="50" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#004B87" />
+            <stop offset="100%" stopColor="#003366" />
+          </linearGradient>
+
+          {/* Premium gold gradient for tools and text */}
+          <linearGradient id="goldMetallic" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FFE082" />
+            <stop offset="50%" stopColor="#FFB300" />
+            <stop offset="100%" stopColor="#FF8F00" />
+          </linearGradient>
+
+          {/* Gold gradient for outer ring */}
+          <linearGradient id="goldRing" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FFF9C4" />
+            <stop offset="50%" stopColor="#FFD54F" />
+            <stop offset="100%" stopColor="#FFB300" />
+          </linearGradient>
+
+          {/* Drop shadow filter to make the tools pop from the flag background */}
+          <filter id="shadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2.5" stdDeviation="2" floodColor="#000000" floodOpacity="0.95" />
+          </filter>
+
+          {/* Clipping path to keep all flag elements inside the circle */}
+          <clipPath id="circleClip">
+            <circle cx="50" cy="50" r="46" />
+          </clipPath>
+
+          {/* Star definition for the Cruzeiro do Sul */}
+          <g id="cruzeiroStar">
+            <polygon 
+              points="0,-3.5 1.0,-1.0 3.5,-0.8 1.6,1.0 2.2,3.5 0,2.2 -2.2,3.5 -1.6,1.0 -3.5,-0.8 -1.0,-1.0" 
+              fill="#FFFFFF" 
+            />
+          </g>
+        </defs>
+
+        {/* Circular Flag Base */}
+        <g clipPath="url(#circleClip)">
+          {/* Green Background */}
+          <rect x="0" y="0" width="100" height="100" fill="url(#goiasGreen)" />
+
+          {/* 4 Yellow Stripes (representing the 8 stripes when alternating with green) */}
+          {/* Stripe height is 12.5 (100 / 8) */}
+          <rect x="0" y="12.5" width="100" height="12.5" fill="url(#goiasYellow)" />
+          <rect x="0" y="37.5" width="100" height="12.5" fill="url(#goiasYellow)" />
+          <rect x="0" y="62.5" width="100" height="12.5" fill="url(#goiasYellow)" />
+          <rect x="0" y="87.5" width="100" height="12.5" fill="url(#goiasYellow)" />
+
+          {/* Blue Canton (top left quadrant) */}
+          <rect x="0" y="0" width="50" height="50" fill="url(#goiasBlue)" />
+
+          {/* Cruzeiro do Sul Stars */}
+          <use href="#cruzeiroStar" x="25" y="12" />
+          <use href="#cruzeiroStar" x="25" y="38" />
+          <use href="#cruzeiroStar" x="13" y="25" />
+          <use href="#cruzeiroStar" x="37" y="25" />
+          <use href="#cruzeiroStar" x="31" y="31" transform="scale(0.65)" transform-origin="31 31" />
         </g>
 
-        {/* Text GO */}
-        <text
-          x="50"
-          y="83"
-          textAnchor="middle"
-          fill="url(#goldGradient)"
-          fontSize="22"
-          fontWeight="900"
-          fontFamily="sans-serif"
-          letterSpacing="1"
-        >
-          GO
-        </text>
+        {/* Golden Metallic Ring Border */}
+        <circle cx="50" cy="50" r="46.5" fill="none" stroke="url(#goldRing)" strokeWidth="3" />
+        <circle cx="50" cy="50" r="45" fill="none" stroke="#000000" strokeWidth="0.5" opacity="0.4" />
 
-        {/* Gold Gradient Definitions */}
-        <defs>
-          <linearGradient id="goldGradient" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#4ade80" /> {/* Light Green */}
-            <stop offset="50%" stopColor="#86efac" />
-            <stop offset="100%" stopColor="#22c55e" />
-          </linearGradient>
-        </defs>
+        {/* Crossed Scissors and Comb (emblem look) */}
+        <g filter="url(#shadowFilter)">
+          
+          {/* 1. The Comb (running diagonally from bottom-left to top-right) */}
+          <g transform="translate(50, 52) rotate(-35)">
+            {/* Comb Spine */}
+            <rect x="-24" y="-4" width="48" height="3" rx="1.5" fill="url(#goldMetallic)" />
+            {/* Comb Teeth */}
+            <path 
+              d="M -22,-1 L -22,7 M -20,-1 L -20,7 M -18,-1 L -18,7 M -16,-1 L -16,7 M -14,-1 L -14,7 M -12,-1 L -12,7 M -10,-1 L -10,7 M -8,-1 L -8,7 M -6,-1 L -6,7 M -4,-1 L -4,7 M -2,-1 L -2,7 M 0,-1 L 0,7 M 2,-1 L 2,7 M 4,-1 L 4,7 M 6,-1 L 6,7 M 8,-1 L 8,7 M 10,-1 L 10,7 M 12,-1 L 12,7 M 14,-1 L 14,7 M 16,-1 L 16,7 M 18,-1 L 18,7 M 20,-1 L 20,7 M 22,-1 L 22,7" 
+              stroke="url(#goldMetallic)" 
+              strokeWidth="1.2" 
+              strokeLinecap="round" 
+            />
+          </g>
+
+          {/* 2. The Scissors (running diagonally from top-left to bottom-right, overlaying the comb) */}
+          <g transform="translate(50, 52) rotate(35)">
+            {/* Rings/Handles */}
+            <circle cx="-21" cy="-5.5" r="4.5" fill="none" stroke="url(#goldMetallic)" strokeWidth="2.5" />
+            <circle cx="-21" cy="5.5" r="4.5" fill="none" stroke="url(#goldMetallic)" strokeWidth="2.5" />
+            
+            {/* Shanks */}
+            <path d="M -16.5,-4.5 L 0,-0.5 M -16.5,4.5 L 0,0.5" stroke="url(#goldMetallic)" strokeWidth="2.2" strokeLinecap="round" />
+            
+            {/* Blades (slightly open for a sharp, clean look) */}
+            <path d="M 0,-0.5 L 23,-4.5 L 21,-1.5 Z" fill="url(#goldMetallic)" />
+            <path d="M 0,0.5 L 23,4.5 L 21,1.5 Z" fill="url(#goldMetallic)" />
+            
+            {/* Center Pivot Screw */}
+            <circle cx="0" cy="0" r="1.5" fill="#1e293b" />
+          </g>
+        </g>
+
+        {/* Text GO at the bottom inside a shiny background banner */}
+        <g filter="url(#shadowFilter)">
+          <text
+            x="50"
+            y="88"
+            textAnchor="middle"
+            fill="url(#goldMetallic)"
+            fontSize="15"
+            fontWeight="900"
+            fontFamily="sans-serif"
+            letterSpacing="1"
+          >
+            GO
+          </text>
+        </g>
       </svg>
     </div>
   );

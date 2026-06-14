@@ -46,6 +46,13 @@ export interface Appointment {
   createdAt: string;
 }
 
+export interface BarberShopProfile {
+  tenantId: string;
+  name: string;
+  logoUrl?: string;
+  createdAt?: string;
+}
+
 const isServer = typeof window === "undefined";
 
 export const getCurrentTenantId = (): string => {
@@ -863,21 +870,44 @@ export const getTenantConfig = (): TenantConfig => {
   }
   const tenantId = getCurrentTenantId();
   const key = `mbg_tenant_config_${tenantId}`;
+  
+  // Tenta carregar do localStorage
   const stored = window.localStorage.getItem(key);
+  let config: TenantConfig | null = null;
   if (stored) {
     try {
-      return JSON.parse(stored) as TenantConfig;
+      config = JSON.parse(stored) as TenantConfig;
     } catch (e) {
       console.error("Erro ao parsear TenantConfig:", e);
     }
   }
-  // Inicializa com a data de hoje como trial
-  const newConfig: TenantConfig = {
-    registeredAt: new Date().toISOString(),
-    subscriptionStatus: "trial",
+
+  // Tenta obter a data de criação real do perfil da barbearia para sincronizar registeredAt
+  const profileKey = `mbg_profile_${tenantId}`;
+  const profileStored = window.localStorage.getItem(profileKey);
+  let dbRegisteredAt: string | null = null;
+  if (profileStored) {
+    try {
+      const prof = JSON.parse(profileStored);
+      if (prof && prof.createdAt) {
+        dbRegisteredAt = prof.createdAt;
+      }
+    } catch (e) {
+      console.error("Erro ao ler data de registro do perfil:", e);
+    }
+  }
+
+  const finalRegisteredAt = dbRegisteredAt || (config ? config.registeredAt : null) || new Date().toISOString();
+
+  const finalConfig: TenantConfig = {
+    registeredAt: finalRegisteredAt,
+    subscriptionStatus: config ? config.subscriptionStatus : "trial",
+    subscriptionPlan: config ? config.subscriptionPlan : undefined,
+    subscriptionExpiresAt: config ? config.subscriptionExpiresAt : undefined,
   };
-  window.localStorage.setItem(key, JSON.stringify(newConfig));
-  return newConfig;
+
+  window.localStorage.setItem(key, JSON.stringify(finalConfig));
+  return finalConfig;
 };
 
 export const updateTenantConfig = (config: TenantConfig) => {
@@ -1117,3 +1147,102 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     servicePopularity: popularServices,
   };
 };
+
+// --- BARBER SHOP PROFILE ---
+export const getBarberShopProfile = async (tenantId: string): Promise<BarberShopProfile> => {
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase
+        .from("barber_shops")
+        .select("*")
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
+      
+      if (error) throw error;
+      
+      if (data) {
+        const prof = {
+          tenantId: data.tenant_id,
+          name: data.name,
+          logoUrl: data.logo_url || undefined,
+          createdAt: data.created_at,
+        };
+        if (!isServer) {
+          window.localStorage.setItem(`mbg_profile_${tenantId}`, JSON.stringify(prof));
+        }
+        return prof;
+      } else if (tenantId !== "default") {
+        // Se não existir o perfil no banco ainda, cria um padrão automaticamente no Supabase
+        const defaultName = tenantId.split("@")[0].toUpperCase() + " BARBEARIA";
+        const { data: newData, error: insertError } = await supabase
+          .from("barber_shops")
+          .insert({
+            tenant_id: tenantId,
+            name: defaultName,
+          })
+          .select()
+          .single();
+          
+        if (!insertError && newData) {
+          const prof = {
+            tenantId: newData.tenant_id,
+            name: newData.name,
+            logoUrl: newData.logo_url || undefined,
+            createdAt: newData.created_at,
+          };
+          if (!isServer) {
+            window.localStorage.setItem(`mbg_profile_${tenantId}`, JSON.stringify(prof));
+          }
+          return prof;
+        }
+      }
+    } catch (e) {
+      console.warn("Erro ao buscar perfil da barbearia no Supabase:", e);
+    }
+  }
+
+  // Fallback local
+  if (!isServer) {
+    const stored = window.localStorage.getItem(`mbg_profile_${tenantId}`);
+    if (stored) {
+      try {
+        return JSON.parse(stored) as BarberShopProfile;
+      } catch (e) {
+        console.error("Erro ao ler perfil local:", e);
+      }
+    }
+  }
+
+  // Perfil padrão caso não exista
+  return {
+    tenantId,
+    name: tenantId === "default" ? "Meu Barbeiro GO" : tenantId.split("@")[0].toUpperCase() + " BARBEARIA",
+  };
+};
+
+export const updateBarberShopProfile = async (profile: BarberShopProfile): Promise<void> => {
+  if (isSupabaseConfigured) {
+    try {
+      const { error } = await supabase
+        .from("barber_shops")
+        .upsert({
+          tenant_id: profile.tenantId,
+          name: profile.name,
+          logo_url: profile.logoUrl || null,
+        });
+
+      if (error) throw error;
+      toast.success("Perfil da barbearia atualizado no servidor!");
+    } catch (e) {
+      console.error("Erro ao salvar perfil no Supabase:", e);
+      toast.error("Erro ao salvar no servidor, atualizando localmente...");
+    }
+  }
+
+  // Sempre salva localmente como fallback/sincronização
+  if (!isServer) {
+    window.localStorage.setItem(`mbg_profile_${profile.tenantId}`, JSON.stringify(profile));
+    toast.success("Perfil da barbearia atualizado localmente!");
+  }
+};
+
