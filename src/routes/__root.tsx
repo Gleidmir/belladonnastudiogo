@@ -89,8 +89,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@meubarbeirogo" },
       { name: "twitter:title", content: "MEU BARBEIRO GO" },
       { name: "twitter:description", content: "Meu Barbeiro GO — Seu corte, sua hora, você no controle. Sistema de agendamento online fácil e prático para barbearias." },
-      { property: "og:image", content: "https://meubarbeirogo.netlify.app/og_image.png?v=2" },
-      { name: "twitter:image", content: "https://meubarbeirogo.netlify.app/og_image.png?v=2" },
+      { property: "og:image", content: "https://meubarbeirogo.netlify.app/og_image.png?v=3" },
+      { name: "twitter:image", content: "https://meubarbeirogo.netlify.app/og_image.png?v=3" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
@@ -110,7 +110,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "apple-touch-icon",
-        href: "https://meubarbeirogo.netlify.app/og_image.png?v=2",
+        href: "https://meubarbeirogo.netlify.app/og_image.png?v=3",
       },
       {
         rel: "canonical",
@@ -124,7 +124,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "HairSalon",
           "name": "Meu Barbeiro GO",
-          "image": "https://meubarbeirogo.netlify.app/og_image.png?v=2",
+          "image": "https://meubarbeirogo.netlify.app/og_image.png?v=3",
           "url": "https://meubarbeirogo.netlify.app",
           "telephone": "+5562999999999",
           "priceRange": "$$",
