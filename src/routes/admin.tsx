@@ -597,10 +597,51 @@ function AdminDashboard() {
     return `${year}-${month}-${day}`;
   };
   const todayStr = mounted ? getLocalTodayStr() : "";
-  const filteredAppointments = appointments.filter((apt) => {
-    if (agendaFilter === "all") return true;
-    return apt.status === agendaFilter;
-  });
+  const filteredAppointments = appointments
+    .filter((apt) => {
+      if (agendaFilter === "all") return true;
+      return apt.status === agendaFilter;
+    })
+    .sort((a, b) => {
+      if (agendaFilter === "pending") {
+        // Agendados: ordem cronológica crescente (mais próximo/antigo primeiro)
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return a.time.localeCompare(b.time);
+      } else if (agendaFilter === "completed" || agendaFilter === "cancelled") {
+        // Realizados ou Cancelados: ordem cronológica decrescente (mais recente primeiro)
+        const dateCompare = b.date.localeCompare(a.date);
+        if (dateCompare !== 0) return dateCompare;
+        return b.time.localeCompare(a.time);
+      } else {
+        // Todos: agrupa por status (pendente > realizado > cancelado) e ordena internamente
+        const getStatusPriority = (status: string) => {
+          if (status === "pending") return 1;
+          if (status === "completed") return 2;
+          if (status === "cancelled") return 3;
+          return 4;
+        };
+
+        const priorityA = getStatusPriority(a.status);
+        const priorityB = getStatusPriority(b.status);
+
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
+
+        if (a.status === "pending") {
+          // Dentro dos pendentes: crescente (mais próximo primeiro)
+          const dateCompare = a.date.localeCompare(b.date);
+          if (dateCompare !== 0) return dateCompare;
+          return a.time.localeCompare(b.time);
+        } else {
+          // Dentro dos realizados/cancelados: decrescente (mais recente primeiro)
+          const dateCompare = b.date.localeCompare(a.date);
+          if (dateCompare !== 0) return dateCompare;
+          return b.time.localeCompare(a.time);
+        }
+      }
+    });
 
   // Today's appointments only
   const todaysAppointments = appointments.filter(
