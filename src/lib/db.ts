@@ -51,6 +51,9 @@ export interface BarberShopProfile {
   name: string;
   logoUrl?: string;
   createdAt?: string;
+  subscriptionPlan?: "mensal" | "trimestral" | "semestral" | "anual" | "master";
+  subscriptionStatus?: "trial" | "active" | "expired";
+  subscriptionExpiresAt?: string;
 }
 
 const isServer = typeof window === "undefined";
@@ -920,6 +923,7 @@ export const updateTenantConfig = (config: TenantConfig) => {
 export interface SubscriptionCheck {
   status: "trial" | "active" | "expired";
   daysLeft: number;
+  plan?: "mensal" | "trimestral" | "semestral" | "anual" | "master";
 }
 
 export const checkSubscriptionStatus = (): SubscriptionCheck => {
@@ -928,7 +932,7 @@ export const checkSubscriptionStatus = (): SubscriptionCheck => {
 
   // Se for master/premium permanente
   if (config.subscriptionStatus === "active" && config.subscriptionPlan === "master") {
-    return { status: "active", daysLeft: 9999 };
+    return { status: "active", daysLeft: 9999, plan: "master" };
   }
 
   // Se possuir assinatura ativa
@@ -941,11 +945,11 @@ export const checkSubscriptionStatus = (): SubscriptionCheck => {
         subscriptionStatus: "expired",
       };
       updateTenantConfig(expiredConfig);
-      return { status: "expired", daysLeft: 0 };
+      return { status: "expired", daysLeft: 0, plan: config.subscriptionPlan };
     } else {
       const diffTime = Math.abs(expiresAt.getTime() - now.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return { status: "active", daysLeft: diffDays };
+      return { status: "active", daysLeft: diffDays, plan: config.subscriptionPlan };
     }
   }
 
@@ -961,15 +965,15 @@ export const checkSubscriptionStatus = (): SubscriptionCheck => {
         subscriptionStatus: "expired",
       };
       updateTenantConfig(expiredConfig);
-      return { status: "expired", daysLeft: 0 };
+      return { status: "expired", daysLeft: 0, plan: config.subscriptionPlan };
     } else {
       const diffTime = Math.abs(trialEndDate.getTime() - now.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return { status: "trial", daysLeft: diffDays };
+      return { status: "trial", daysLeft: diffDays, plan: config.subscriptionPlan };
     }
   }
 
-  return { status: config.subscriptionStatus, daysLeft: 0 };
+  return { status: config.subscriptionStatus, daysLeft: 0, plan: config.subscriptionPlan };
 };
 
 export const activateSubscription = async (code: string): Promise<boolean> => {
@@ -1027,6 +1031,24 @@ export const activateSubscription = async (code: string): Promise<boolean> => {
   };
 
   updateTenantConfig(updatedConfig);
+
+  // Sincroniza com o Supabase se estiver configurado
+  if (isSupabaseConfigured) {
+    try {
+      const tenantId = getCurrentTenantId();
+      await supabase
+        .from("barber_shops")
+        .update({
+          subscription_plan: plan,
+          subscription_status: "active",
+          subscription_expires_at: expiresAtStr,
+        })
+        .eq("tenant_id", tenantId);
+    } catch (e) {
+      console.error("Erro ao sincronizar ativação de assinatura com Supabase:", e);
+    }
+  }
+
   return true;
 };
 
@@ -1161,14 +1183,34 @@ export const getBarberShopProfile = async (tenantId: string): Promise<BarberShop
       if (error) throw error;
       
       if (data) {
-        const prof = {
+        const prof: BarberShopProfile = {
           tenantId: data.tenant_id,
           name: data.name,
           logoUrl: data.logo_url || undefined,
           createdAt: data.created_at,
+          subscriptionPlan: data.subscription_plan || "mensal",
+          subscriptionStatus: data.subscription_status || "trial",
+          subscriptionExpiresAt: data.subscription_expires_at || undefined,
         };
         if (!isServer) {
           window.localStorage.setItem(`mbg_profile_${tenantId}`, JSON.stringify(prof));
+          
+          // Sincroniza o TenantConfig no localStorage
+          const configKey = `mbg_tenant_config_${tenantId}`;
+          const currentConfigStr = window.localStorage.getItem(configKey);
+          let currentConfig = { registeredAt: data.created_at || new Date().toISOString(), subscriptionStatus: "trial" as const };
+          if (currentConfigStr) {
+            try {
+              currentConfig = JSON.parse(currentConfigStr);
+            } catch (e) {}
+          }
+          const updatedConfig: TenantConfig = {
+            registeredAt: data.created_at || currentConfig.registeredAt,
+            subscriptionPlan: data.subscription_plan || undefined,
+            subscriptionStatus: data.subscription_status || "trial",
+            subscriptionExpiresAt: data.subscription_expires_at || undefined,
+          };
+          window.localStorage.setItem(configKey, JSON.stringify(updatedConfig));
         }
         return prof;
       } else if (tenantId !== "default") {
@@ -1184,14 +1226,27 @@ export const getBarberShopProfile = async (tenantId: string): Promise<BarberShop
           .single();
           
         if (!insertError && newData) {
-          const prof = {
+          const prof: BarberShopProfile = {
             tenantId: newData.tenant_id,
             name: newData.name,
             logoUrl: newData.logo_url || undefined,
             createdAt: newData.created_at,
+            subscriptionPlan: newData.subscription_plan || "mensal",
+            subscriptionStatus: newData.subscription_status || "trial",
+            subscriptionExpiresAt: newData.subscription_expires_at || undefined,
           };
           if (!isServer) {
             window.localStorage.setItem(`mbg_profile_${tenantId}`, JSON.stringify(prof));
+            
+            // Sincroniza o TenantConfig no localStorage
+            const configKey = `mbg_tenant_config_${tenantId}`;
+            const updatedConfig: TenantConfig = {
+              registeredAt: newData.created_at || new Date().toISOString(),
+              subscriptionPlan: newData.subscription_plan || undefined,
+              subscriptionStatus: newData.subscription_status || "trial",
+              subscriptionExpiresAt: newData.subscription_expires_at || undefined,
+            };
+            window.localStorage.setItem(configKey, JSON.stringify(updatedConfig));
           }
           return prof;
         }
@@ -1214,9 +1269,13 @@ export const getBarberShopProfile = async (tenantId: string): Promise<BarberShop
   }
 
   // Perfil padrão caso não exista
+  const config = getTenantConfig();
   return {
     tenantId,
     name: tenantId === "default" ? "Meu Barbeiro GO" : tenantId.split("@")[0].toUpperCase() + " BARBEARIA",
+    subscriptionPlan: config.subscriptionPlan || "mensal",
+    subscriptionStatus: config.subscriptionStatus || "trial",
+    subscriptionExpiresAt: config.subscriptionExpiresAt || undefined,
   };
 };
 
@@ -1244,5 +1303,59 @@ export const updateBarberShopProfile = async (profile: BarberShopProfile): Promi
     window.localStorage.setItem(`mbg_profile_${profile.tenantId}`, JSON.stringify(profile));
     toast.success("Perfil da barbearia atualizado localmente!");
   }
+};
+
+// --- MASTER ADMIN ACTIONS ---
+export const getAllBarberShops = async (): Promise<BarberShopProfile[]> => {
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase
+        .from("barber_shops")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data || []).map((d: any) => ({
+        tenantId: d.tenant_id,
+        name: d.name,
+        logoUrl: d.logo_url || undefined,
+        createdAt: d.created_at,
+        subscriptionPlan: d.subscription_plan || "mensal",
+        subscriptionStatus: d.subscription_status || "trial",
+        subscriptionExpiresAt: d.subscription_expires_at || undefined,
+      }));
+    } catch (e) {
+      console.error("Erro ao buscar todas as barbearias:", e);
+      return [];
+    }
+  }
+  return [];
+};
+
+export const updateBarberShopSubscription = async (
+  tenantId: string,
+  plan: "mensal" | "trimestral" | "semestral" | "anual" | "master",
+  status: "trial" | "active" | "expired",
+  expiresAt: string | null
+): Promise<boolean> => {
+  if (isSupabaseConfigured) {
+    try {
+      const { error } = await supabase
+        .from("barber_shops")
+        .update({
+          subscription_plan: plan,
+          subscription_status: status,
+          subscription_expires_at: expiresAt,
+        })
+        .eq("tenant_id", tenantId);
+      if (error) throw error;
+      toast.success("Assinatura da barbearia atualizada com sucesso!");
+      return true;
+    } catch (e) {
+      console.error("Erro ao atualizar assinatura no Supabase:", e);
+      toast.error("Erro ao salvar alterações no banco online.");
+      return false;
+    }
+  }
+  return false;
 };
 

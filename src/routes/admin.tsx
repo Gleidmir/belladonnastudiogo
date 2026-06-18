@@ -72,6 +72,7 @@ import {
   type BarberShopProfile,
 } from "../lib/db";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import { MasterAdminPanel } from "../components/MasterAdminPanel";
 
 const weekdaysList = [
   { label: "Dom", value: 0 },
@@ -108,7 +109,7 @@ export const Route = createFileRoute("/admin")({
 function AdminDashboard() {
   const navigate = useNavigate();
   const [session, setSession] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "agenda" | "clientes" | "servicos" | "barbeiros" | "perfil">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "agenda" | "clientes" | "servicos" | "barbeiros" | "perfil" | "master">("dashboard");
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -242,8 +243,34 @@ function AdminDashboard() {
     if (mounted) {
       const interval = setInterval(() => {
         loadAllData(true);
+        refreshSubscriptionStatus();
       }, 10000);
       return () => clearInterval(interval);
+    }
+  }, [mounted]);
+
+  // Automatic activation via URL parameter
+  useEffect(() => {
+    if (mounted) {
+      const params = new URLSearchParams(window.location.search);
+      const urlCode = params.get("activate_code") || params.get("code");
+      if (urlCode) {
+        setActivating(true);
+        activateSubscription(urlCode).then((success) => {
+          if (success) {
+            toast.success("Assinatura ativada automaticamente com sucesso!");
+            refreshSubscriptionStatus();
+            // Limpa o parâmetro da URL sem recarregar a página
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+          } else {
+            toast.error("Código de ativação da URL inválido.");
+          }
+          setActivating(false);
+        }).catch(() => {
+          setActivating(false);
+        });
+      }
     }
   }, [mounted]);
 
@@ -767,19 +794,39 @@ function AdminDashboard() {
         </div>
       </header>
 
-      {/* Trial Banner */}
-      {subCheck && subCheck.status === "trial" && (
-        <div className="bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-amber-500/20 border-b border-amber-500/30 py-2.5 px-4 text-center animate-in slide-in-from-top duration-300">
+      {/* Banner de Status de Assinatura */}
+      {subCheck && (subCheck.status === "trial" || subCheck.status === "active") && (
+        <div className={`border-b py-2.5 px-4 text-center animate-in slide-in-from-top duration-300 ${
+          subCheck.status === "trial"
+            ? "bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-amber-500/20 border-amber-500/30"
+            : "bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-emerald-500/20 border-emerald-500/30"
+        }`}>
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2.5 text-xs">
-            <span className="font-semibold text-amber-300">
-              Você está no período de teste grátis (restam {subCheck.daysLeft} {subCheck.daysLeft === 1 ? 'dia' : 'dias'}).
+            <span className={`font-semibold ${subCheck.status === "trial" ? "text-amber-300" : "text-emerald-300"}`}>
+              {subCheck.status === "trial" ? (
+                `Você está no período de teste grátis (restam ${subCheck.daysLeft} ${subCheck.daysLeft === 1 ? 'dia' : 'dias'}).`
+              ) : subCheck.plan === "master" ? (
+                "Seu plano é VIP / Vitalício (Acesso permanente)."
+              ) : (
+                `Seu plano é ${subCheck.plan ? subCheck.plan.charAt(0).toUpperCase() + subCheck.plan.slice(1) : ''} (restam ${subCheck.daysLeft} ${subCheck.daysLeft === 1 ? 'dia' : 'dias'}).`
+              )}
             </span>
-            <button
-              onClick={() => setShowSubscriptionModal(true)}
-              className="rounded-full bg-amber-500 text-zinc-950 px-4 py-1 font-extrabold text-[10px] hover:bg-amber-400 hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-md shadow-amber-500/15"
-            >
-              Assinar um Plano
-            </button>
+            {subCheck.status === "trial" && (
+              <button
+                onClick={() => setShowSubscriptionModal(true)}
+                className="rounded-full bg-amber-500 text-zinc-950 px-4 py-1 font-extrabold text-[10px] hover:bg-amber-400 hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-md shadow-amber-500/15"
+              >
+                Assinar um Plano
+              </button>
+            )}
+            {subCheck.status === "active" && subCheck.plan !== "master" && (
+              <button
+                onClick={() => setShowSubscriptionModal(true)}
+                className="rounded-full bg-emerald-500 text-zinc-950 px-4 py-1 font-extrabold text-[10px] hover:bg-emerald-400 hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-md shadow-emerald-500/15"
+              >
+                Renovar / Alterar Plano
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -796,6 +843,9 @@ function AdminDashboard() {
             { id: "servicos" as const, label: "Gerenciar Serviços", icon: Layers },
             { id: "barbeiros" as const, label: "Gerenciar Barbeiros", icon: Scissors },
             { id: "perfil" as const, label: "Minha Barbearia", icon: Store },
+            ...(session?.email === "gleidmircristino@hotmail.com"
+              ? [{ id: "master" as const, label: "Adm Master", icon: UserCheck }]
+              : []),
           ].map((tab) => (
             <button
               key={tab.id}
@@ -1789,6 +1839,11 @@ function AdminDashboard() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* TAB: MASTER ADMIN */}
+          {activeTab === "master" && session?.email === "gleidmircristino@hotmail.com" && (
+            <MasterAdminPanel />
           )}
 
         </main>
