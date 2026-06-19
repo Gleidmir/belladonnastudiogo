@@ -377,7 +377,7 @@ export function MasterAdminPanel() {
                       <div>
                         <span className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-wider block">Plano Atual</span>
                         <span className="text-zinc-300 font-bold mt-1 block capitalize">
-                          {shop.subscriptionPlan || "N/A"}
+                          {shop.subscriptionStatus === "trial" ? "Teste Grátis (Trial)" : (shop.subscriptionPlan || "N/A")}
                         </span>
                       </div>
                       <div>
