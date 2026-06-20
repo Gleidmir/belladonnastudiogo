@@ -584,13 +584,15 @@ export const addClient = async (name: string, phone: string, email?: string): Pr
         return mapClientFromDB(existing);
       }
 
-      const { error } = await supabase.from("clients").insert({
+      const { error } = await supabase.from("clients").upsert({
         id: newClient.id,
         name: newClient.name,
         phone: newClient.phone,
         email: newClient.email,
         registered_at: newClient.registeredAt,
         tenant_id: tenantId,
+      }, {
+        onConflict: 'tenant_id,phone'
       });
 
       if (error) throw error;
