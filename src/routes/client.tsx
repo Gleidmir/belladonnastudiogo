@@ -57,6 +57,15 @@ export const Route = createFileRoute("/client")({
 
 function ClientDashboard() {
   const navigate = useNavigate();
+  
+  const handleClearSessionAndGoHome = () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("mbg_client_tenant");
+      window.localStorage.removeItem("mbg_session");
+    }
+    navigate({ to: "/" });
+  };
+
   const [session, setSession] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"book" | "my-appointments">("book");
   const [shopProfile, setShopProfile] = useState<BarberShopProfile | null>(null);
@@ -154,6 +163,12 @@ function ClientDashboard() {
           <p className="text-zinc-400 text-xs mt-3 max-w-xs leading-relaxed">
             Esta barbearia não foi encontrada em nossa base de dados ou foi desativada pelo administrador.
           </p>
+          <button
+            onClick={handleClearSessionAndGoHome}
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 hover:text-white px-6 py-3 text-xs font-bold transition-all cursor-pointer active:scale-95"
+          >
+            Voltar para o Início
+          </button>
         </main>
 
         {/* Footer */}
