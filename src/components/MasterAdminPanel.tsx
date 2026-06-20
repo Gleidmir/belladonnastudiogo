@@ -468,9 +468,9 @@ export function MasterAdminPanel() {
                         </button>
                         <button
                           onClick={() => handleSetTrial(shop)}
-                          className="w-full rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white py-3 text-xs font-black transition-all cursor-pointer active:scale-95 text-center shadow-lg shadow-emerald-700/10 uppercase"
+                          className="w-full rounded-xl bg-yellow-400 hover:bg-yellow-300 text-zinc-950 py-3 text-xs font-black transition-all cursor-pointer active:scale-95 text-center shadow-lg shadow-yellow-400/20 uppercase"
                         >
-                          REDEFINIR PARA TESTE GRÁTIS (TRIAL)
+                          REDEFINIR PARA TESTE GRÁTIS
                         </button>
                         <button
                           onClick={() => handleExpireSubscription(shop)}
