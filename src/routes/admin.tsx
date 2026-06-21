@@ -70,6 +70,7 @@ import {
   getBarberShopProfile,
   updateBarberShopProfile,
   type BarberShopProfile,
+  DEFAULT_WORK_HOURS,
 } from "../lib/db";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 import { MasterAdminPanel } from "../components/MasterAdminPanel";
@@ -165,6 +166,7 @@ function AdminDashboard() {
   const [barberWorkDays, setBarberWorkDays] = useState<number[]>([1, 2, 3, 4, 5, 6]);
   const [barberStartTime, setBarberStartTime] = useState("08:00");
   const [barberEndTime, setBarberEndTime] = useState("19:00");
+  const [barberWorkHours, setBarberWorkHours] = useState<string[]>(DEFAULT_WORK_HOURS);
   const [barberBlockedDates, setBarberBlockedDates] = useState("");
 
   // Edit/Add client form state
@@ -394,6 +396,35 @@ function AdminDashboard() {
       .map((d) => d.trim())
       .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
 
+    // Check for conflicting appointments when editing an existing barber
+    if (editingBarber) {
+      const originalHours = editingBarber.workHours || DEFAULT_WORK_HOURS;
+      const deselectedHours = originalHours.filter(h => !barberWorkHours.includes(h));
+      
+      if (deselectedHours.length > 0) {
+        const todayStr = new Date().toISOString().split("T")[0];
+        const conflictingApts = appointments.filter(apt => 
+          apt.barberId === editingBarber.id &&
+          apt.status !== "cancelled" &&
+          apt.date >= todayStr &&
+          deselectedHours.includes(apt.time)
+        );
+
+        if (conflictingApts.length > 0) {
+          const aptDetails = conflictingApts.map(apt => {
+            const formattedDate = new Date(apt.date + "T12:00:00").toLocaleDateString("pt-BR");
+            return `- ${apt.clientName} no dia ${formattedDate} às ${apt.time}`;
+          }).slice(0, 5).join("\n");
+          
+          const confirmMsg = `Atenção! Você está desativando horários que já possuem agendamentos ativos:\n\n${aptDetails}${conflictingApts.length > 5 ? `\n...e mais ${conflictingApts.length - 5} agendamento(s)` : ""}\n\nDeseja salvar as alterações mesmo assim? Lembre-se de avisar os clientes ou gerenciar os agendamentos na aba Agenda.`;
+          
+          if (!window.confirm(confirmMsg)) {
+            return;
+          }
+        }
+      }
+    }
+
     setLoading(true);
     try {
       if (editingBarber) {
@@ -406,6 +437,7 @@ function AdminDashboard() {
           startTime: barberStartTime,
           endTime: barberEndTime,
           blockedDates: parsedBlocked,
+          workHours: barberWorkHours,
         });
         setEditingBarber(null);
       } else {
@@ -422,6 +454,7 @@ function AdminDashboard() {
           startTime: barberStartTime,
           endTime: barberEndTime,
           blockedDates: parsedBlocked,
+          workHours: barberWorkHours,
         });
       }
 
@@ -431,6 +464,7 @@ function AdminDashboard() {
       setBarberWorkDays([1, 2, 3, 4, 5, 6]);
       setBarberStartTime("08:00");
       setBarberEndTime("19:00");
+      setBarberWorkHours(DEFAULT_WORK_HOURS);
       setBarberBlockedDates("");
       setShowBarberForm(false);
       await loadAllData();
@@ -448,6 +482,7 @@ function AdminDashboard() {
     setBarberWorkDays(barber.workDays || [1, 2, 3, 4, 5, 6]);
     setBarberStartTime(barber.startTime || "08:00");
     setBarberEndTime(barber.endTime || "19:00");
+    setBarberWorkHours(barber.workHours || DEFAULT_WORK_HOURS);
     setBarberBlockedDates((barber.blockedDates || []).join(", "));
     setShowBarberForm(true);
   };
@@ -1470,6 +1505,11 @@ function AdminDashboard() {
                       setBarberName("");
                       setBarberAvatar("");
                       setBarberPhone("");
+                      setBarberWorkDays([1, 2, 3, 4, 5, 6]);
+                      setBarberStartTime("08:00");
+                      setBarberEndTime("19:00");
+                      setBarberWorkHours(DEFAULT_WORK_HOURS);
+                      setBarberBlockedDates("");
                       setShowBarberForm(true);
                     }}
                     className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold transition-all shadow shadow-amber-500/10"
@@ -1564,7 +1604,12 @@ function AdminDashboard() {
                       <div className="flex items-center gap-2">
                         <select
                           value={barberStartTime}
-                          onChange={(e) => setBarberStartTime(e.target.value)}
+                          onChange={(e) => {
+                            const newStart = e.target.value;
+                            setBarberStartTime(newStart);
+                            const updated = DEFAULT_WORK_HOURS.filter(h => h >= newStart && h <= barberEndTime);
+                            setBarberWorkHours(updated);
+                          }}
                           className="flex-1 rounded-xl bg-zinc-950 px-3 py-2.5 text-xs text-white ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none"
                         >
                           {hourOptions.map(h => <option key={h} value={h}>{h}</option>)}
@@ -1572,12 +1617,49 @@ function AdminDashboard() {
                         <span className="text-xs text-zinc-600 font-bold">até</span>
                         <select
                           value={barberEndTime}
-                          onChange={(e) => setBarberEndTime(e.target.value)}
+                          onChange={(e) => {
+                            const newEnd = e.target.value;
+                            setBarberEndTime(newEnd);
+                            const updated = DEFAULT_WORK_HOURS.filter(h => h >= barberStartTime && h <= newEnd);
+                            setBarberWorkHours(updated);
+                          }}
                           className="flex-1 rounded-xl bg-zinc-950 px-3 py-2.5 text-xs text-white ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none"
                         >
                           {hourOptions.map(h => <option key={h} value={h}>{h}</option>)}
                         </select>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Horários Individuais Editáveis */}
+                  <div className="pt-2">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 block mb-2">
+                      Horários de Atendimento Individuais (Selecione para Ativar/Desativar)
+                    </label>
+                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                      {DEFAULT_WORK_HOURS.map((hour) => {
+                        const isChecked = barberWorkHours.includes(hour);
+                        return (
+                          <button
+                            key={hour}
+                            type="button"
+                            onClick={() => {
+                              if (isChecked) {
+                                setBarberWorkHours(barberWorkHours.filter((h) => h !== hour));
+                              } else {
+                                setBarberWorkHours([...barberWorkHours, hour].sort());
+                              }
+                            }}
+                            className={`px-2 py-1.5 text-center text-xs font-bold rounded-xl border transition-all ${
+                              isChecked
+                                ? "bg-amber-500 text-zinc-950 border-amber-500 shadow-md shadow-amber-500/10"
+                                : "bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white"
+                            }`}
+                          >
+                            {hour}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -1604,6 +1686,7 @@ function AdminDashboard() {
                         setBarberWorkDays([1, 2, 3, 4, 5, 6]);
                         setBarberStartTime("08:00");
                         setBarberEndTime("19:00");
+                        setBarberWorkHours(DEFAULT_WORK_HOURS);
                         setBarberBlockedDates("");
                       }}
                       className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-xs font-bold text-zinc-400 hover:text-white transition-colors"

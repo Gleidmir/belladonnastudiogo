@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS public.barbers (
     start_time TEXT DEFAULT '08:00',
     end_time TEXT DEFAULT '19:00',
     blocked_dates TEXT DEFAULT '[]',
+    work_hours TEXT DEFAULT '["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00"]',
     tenant_id TEXT DEFAULT 'default' NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -118,11 +119,11 @@ CREATE POLICY "Permitir exclusão pelo próprio cliente" ON public.appointments 
 -- ====================================================
 
 -- Inserir Barbeiros Iniciais (caso não existam)
-INSERT INTO public.barbers (id, name, avatar, phone, work_days, start_time, end_time, blocked_dates) VALUES
-('b1', 'PASTOR', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face', '5562993299120', '[1,2,3,4,5,6]', '08:00', '19:00', '[]'),
-('b2', 'RAFAEL', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&crop=face', '5562993299120', '[1,2,3,4,5,6]', '08:00', '19:00', '[]'),
-('b3', 'ANDRÉ', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face', '5562993299120', '[1,2,3,4,5,6]', '08:00', '19:00', '[]'),
-('b4', 'BRUNO', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face', '5562993299120', '[1,2,3,4,5,6]', '08:00', '19:00', '[]')
+INSERT INTO public.barbers (id, name, avatar, phone, work_days, start_time, end_time, blocked_dates, work_hours) VALUES
+('b1', 'PASTOR', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face', '5562993299120', '[1,2,3,4,5,6]', '08:00', '19:00', '[]', '["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00"]'),
+('b2', 'RAFAEL', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&crop=face', '5562993299120', '[1,2,3,4,5,6]', '08:00', '19:00', '[]', '["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00"]'),
+('b3', 'ANDRÉ', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face', '5562993299120', '[1,2,3,4,5,6]', '08:00', '19:00', '[]', '["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00"]'),
+('b4', 'BRUNO', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face', '5562993299120', '[1,2,3,4,5,6]', '08:00', '19:00', '[]', '["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00"]')
 ON CONFLICT (id) DO NOTHING;
 
 -- Inserir Serviços Iniciais (caso não existam)

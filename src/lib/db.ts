@@ -20,7 +20,15 @@ export interface Barber {
   startTime?: string; // e.g. "08:00"
   endTime?: string; // e.g. "19:00"
   blockedDates?: string[]; // array of dates formatted YYYY-MM-DD
+  workHours?: string[]; // array of times formatted HH:MM e.g. ["08:00", "08:30"]
 }
+
+export const DEFAULT_WORK_HOURS = [
+  "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+  "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00"
+];
+
 
 export interface Client {
   id: string;
@@ -179,6 +187,17 @@ const mapBarberFromDB = (b: any): Barber => {
     }
   }
 
+  let workHours = DEFAULT_WORK_HOURS;
+  if (b.work_hours) {
+    try {
+      workHours = typeof b.work_hours === "string" ? JSON.parse(b.work_hours) : b.work_hours;
+    } catch (e) {
+      if (typeof b.work_hours === "string") {
+        workHours = b.work_hours.split(",").map((s: string) => s.trim()).filter(Boolean);
+      }
+    }
+  }
+
   return {
     id: b.id,
     name: b.name,
@@ -188,15 +207,16 @@ const mapBarberFromDB = (b: any): Barber => {
     startTime: b.start_time || "08:00",
     endTime: b.end_time || "19:00",
     blockedDates: Array.isArray(blockedDates) ? blockedDates : [],
+    workHours: Array.isArray(workHours) ? workHours : DEFAULT_WORK_HOURS,
   };
 };
 
 // Default data
 const defaultBarbers: Barber[] = [
-  { id: "b1", name: "PASTOR", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "08:00", endTime: "19:00", blockedDates: [] },
-  { id: "b2", name: "RAFAEL", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "08:00", endTime: "19:00", blockedDates: [] },
-  { id: "b3", name: "ANDRÉ", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "08:00", endTime: "19:00", blockedDates: [] },
-  { id: "b4", name: "BRUNO", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "08:00", endTime: "19:00", blockedDates: [] },
+  { id: "b1", name: "PASTOR", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "08:00", endTime: "19:00", blockedDates: [], workHours: DEFAULT_WORK_HOURS },
+  { id: "b2", name: "RAFAEL", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "08:00", endTime: "19:00", blockedDates: [], workHours: DEFAULT_WORK_HOURS },
+  { id: "b3", name: "ANDRÉ", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "08:00", endTime: "19:00", blockedDates: [], workHours: DEFAULT_WORK_HOURS },
+  { id: "b4", name: "BRUNO", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "08:00", endTime: "19:00", blockedDates: [], workHours: DEFAULT_WORK_HOURS },
 ];
 
 const defaultServices: Service[] = [
@@ -462,6 +482,7 @@ export const addBarber = async (barber: Omit<Barber, "id">): Promise<Barber> => 
   const newBarber: Barber = {
     ...barber,
     id: `b_${Date.now()}`,
+    workHours: barber.workHours || DEFAULT_WORK_HOURS,
   };
 
   if (isSupabaseConfigured) {
@@ -476,9 +497,28 @@ export const addBarber = async (barber: Omit<Barber, "id">): Promise<Barber> => 
         start_time: newBarber.startTime || "08:00",
         end_time: newBarber.endTime || "19:00",
         blocked_dates: JSON.stringify(newBarber.blockedDates || []),
+        work_hours: JSON.stringify(newBarber.workHours || DEFAULT_WORK_HOURS),
         tenant_id: tenantId,
       });
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes("work_hours") || error.code === "P0002" || error.code === "42703") {
+          console.warn("work_hours column not found. Inserting without it...");
+          const { error: fallbackError } = await supabase.from("barbers").insert({
+            id: newBarber.id,
+            name: newBarber.name,
+            avatar: newBarber.avatar,
+            phone: newBarber.phone,
+            work_days: JSON.stringify(newBarber.workDays || [1, 2, 3, 4, 5, 6]),
+            start_time: newBarber.startTime || "08:00",
+            end_time: newBarber.endTime || "19:00",
+            blocked_dates: JSON.stringify(newBarber.blockedDates || []),
+            tenant_id: tenantId,
+          });
+          if (fallbackError) throw fallbackError;
+        } else {
+          throw error;
+        }
+      }
       toast.success("Barbeiro adicionado ao Supabase!");
       return newBarber;
     } catch (e) {
@@ -508,10 +548,32 @@ export const updateBarber = async (updatedBarber: Barber): Promise<void> => {
           start_time: updatedBarber.startTime || "08:00",
           end_time: updatedBarber.endTime || "19:00",
           blocked_dates: JSON.stringify(updatedBarber.blockedDates || []),
+          work_hours: JSON.stringify(updatedBarber.workHours || DEFAULT_WORK_HOURS),
         })
         .eq("id", updatedBarber.id)
         .eq("tenant_id", tenantId);
-      if (error) throw error;
+        
+      if (error) {
+        if (error.message?.includes("work_hours") || error.code === "P0002" || error.code === "42703") {
+          console.warn("work_hours column not found. Updating without it...");
+          const { error: fallbackError } = await supabase
+            .from("barbers")
+            .update({
+              name: updatedBarber.name,
+              avatar: updatedBarber.avatar,
+              phone: updatedBarber.phone,
+              work_days: JSON.stringify(updatedBarber.workDays || [1, 2, 3, 4, 5, 6]),
+              start_time: updatedBarber.startTime || "08:00",
+              end_time: updatedBarber.endTime || "19:00",
+              blocked_dates: JSON.stringify(updatedBarber.blockedDates || []),
+            })
+            .eq("id", updatedBarber.id)
+            .eq("tenant_id", tenantId);
+          if (fallbackError) throw fallbackError;
+        } else {
+          throw error;
+        }
+      }
       toast.success("Barbeiro atualizado no Supabase!");
       return;
     } catch (e) {

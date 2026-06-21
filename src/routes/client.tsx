@@ -515,8 +515,8 @@ function BookingFlow({ clientPhone, clientName, shopProfile, onSessionUpdate, on
   // Available times logic (every 30 minutes)
   const allTimeSlots = [
     "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-    "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
-    "17:00", "17:30", "18:00", "18:30"
+    "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+    "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00"
   ];
 
   // checking booked slots
@@ -843,14 +843,20 @@ function BookingFlow({ clientPhone, clientName, shopProfile, onSessionUpdate, on
                   return `${hours}:${minutes}`;
                 })();
 
-                const activeSlots = allTimeSlots.filter((time) => {
+                const barberHours = selectedBarber?.workHours && selectedBarber.workHours.length > 0
+                  ? selectedBarber.workHours
+                  : allTimeSlots;
+
+                const activeSlots = barberHours.filter((time) => {
                   const barberStart = selectedBarber?.startTime || "08:00";
                   const barberEnd = selectedBarber?.endTime || "19:00";
                   
+                  const isWithinShift = time >= barberStart && time < barberEnd;
+                  
                   if (selectedDate === todayStr) {
-                    return time >= barberStart && time < barberEnd && time > nowTimeStr;
+                    return isWithinShift && time > nowTimeStr;
                   }
-                  return time >= barberStart && time < barberEnd;
+                  return isWithinShift;
                 });
 
                 if (activeSlots.length === 0) {
