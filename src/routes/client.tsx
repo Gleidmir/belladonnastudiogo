@@ -316,6 +316,7 @@ function ClientDashboard() {
             clientName={session.name}
             shopProfile={shopProfile}
             onSessionUpdate={setSession}
+            onLogout={handleLogout}
           />
         ) : (
           <MyAppointments clientPhone={session.phone} />
@@ -363,11 +364,12 @@ interface BookingFlowProps {
   clientName: string;
   shopProfile: BarberShopProfile | null;
   onSessionUpdate: (newSession: any) => void;
+  onLogout: () => void;
 }
 
 type Step = "service" | "barber" | "datetime" | "confirm" | "success";
 
-function BookingFlow({ clientPhone, clientName, shopProfile, onSessionUpdate }: BookingFlowProps) {
+function BookingFlow({ clientPhone, clientName, shopProfile, onSessionUpdate, onLogout }: BookingFlowProps) {
   const [step, setStep] = useState<Step>("service");
   const [services, setServices] = useState<Service[]>([]);
   const [barbers, setBarbers] = useState<Barber[]>([]);
@@ -1063,9 +1065,16 @@ function BookingFlow({ clientPhone, clientName, shopProfile, onSessionUpdate }: 
 
           <button
             onClick={handleReset}
-            className="w-full rounded-xl bg-zinc-900 border border-zinc-800 py-3.5 text-xs font-bold text-zinc-400 hover:text-white transition-colors"
+            className="w-full rounded-xl bg-blue-900 border border-blue-800 hover:bg-blue-800 py-3.5 text-xs font-bold text-white transition-colors active:scale-[0.98] mb-3"
           >
             Fazer Novo Agendamento
+          </button>
+
+          <button
+            onClick={onLogout}
+            className="w-full rounded-xl bg-red-600 hover:bg-red-500 py-3.5 text-xs font-bold text-white transition-colors active:scale-[0.98]"
+          >
+            Sair
           </button>
         </div>
       )}

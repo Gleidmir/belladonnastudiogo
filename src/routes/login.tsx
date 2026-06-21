@@ -26,6 +26,7 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [isClientOnly, setIsClientOnly] = useState(false);
   const [shopProfile, setShopProfile] = useState<any>(null);
+  const [isAdminOverride, setIsAdminOverride] = useState(false);
 
   // Client form state
   const [clientName, setClientName] = useState("");
@@ -39,9 +40,10 @@ function LoginPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      const isAdminOverride = params.get("admin") === "true" || params.get("role") === "admin";
+      const isOverride = params.get("admin") === "true" || params.get("role") === "admin";
+      setIsAdminOverride(isOverride);
       
-      if (isAdminOverride) {
+      if (isOverride) {
         setIsClientOnly(false);
         setActiveTab("admin");
         window.localStorage.removeItem("mbg_client_tenant");
@@ -181,13 +183,7 @@ function LoginPage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col justify-between antialiased">
       {/* Header / Nav */}
-      <header className="px-6 py-4 flex items-center">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm font-semibold"
-        >
-          <ArrowLeft className="h-4 w-4" /> Voltar para o início
-        </Link>
+      <header className="px-6 py-4 flex items-center min-h-[52px]">
       </header>
 
       {/* Main card */}
@@ -219,7 +215,7 @@ function LoginPage() {
           </div>
  
           {/* Role selection tab */}
-          {!isClientOnly && (
+          {isAdminOverride ? (
             <div className="flex rounded-xl bg-zinc-950/50 p-1 border border-zinc-800 mb-6">
               <button
                 type="button"
@@ -239,6 +235,12 @@ function LoginPage() {
               >
                 Sou Barbeiro / ADM
               </button>
+            </div>
+          ) : (
+            <div className="flex justify-center mb-6">
+              <span className="rounded-xl bg-amber-500 text-zinc-950 px-8 py-2.5 text-xs font-black uppercase shadow-md glow-emerald-sm tracking-wider select-none">
+                CLIENTE
+              </span>
             </div>
           )}
 
@@ -283,13 +285,6 @@ function LoginPage() {
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "AGENDAR MEU HORÁRIO →"}
               </button>
-
-              <Link
-                to="/"
-                className="block text-center text-xs text-zinc-500 hover:text-white transition-colors mt-4 font-semibold"
-              >
-                Cancelar e sair
-              </Link>
             </form>
           ) : (
             /* ADMIN FORM */
