@@ -60,18 +60,18 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Map Amber to Light Green shades */
-  --color-amber-50: oklch(0.97 0.04 140);
-  --color-amber-100: oklch(0.94 0.08 140);
-  --color-amber-200: oklch(0.90 0.12 140);
-  --color-amber-300: oklch(0.85 0.15 140);
-  --color-amber-400: oklch(0.80 0.18 140);
-  --color-amber-500: oklch(0.75 0.20 140); /* Main light green accent */
-  --color-amber-600: oklch(0.68 0.22 140);
-  --color-amber-700: oklch(0.58 0.20 140);
-  --color-amber-800: oklch(0.48 0.18 140);
-  --color-amber-900: oklch(0.38 0.14 140);
-  --color-amber-950: oklch(0.24 0.09 140);
+  /* Map Amber to Delicate Light Pink shades */
+  --color-amber-50: oklch(0.98 0.015 350);
+  --color-amber-100: oklch(0.96 0.03 350);
+  --color-amber-200: oklch(0.92 0.06 350);
+  --color-amber-300: oklch(0.86 0.09 350);
+  --color-amber-400: oklch(0.80 0.12 350);
+  --color-amber-500: oklch(0.74 0.15 350); /* Main delicate pink accent */
+  --color-amber-600: oklch(0.66 0.16 350);
+  --color-amber-700: oklch(0.56 0.15 350);
+  --color-amber-800: oklch(0.46 0.13 350);
+  --color-amber-900: oklch(0.36 0.10 350);
+  --color-amber-950: oklch(0.22 0.06 350);
 
   /* Map Zinc to Sleek Dark-Platinum shades */
   --color-zinc-50: oklch(0.96 0.003 240);
@@ -95,7 +95,7 @@
   --card-foreground: oklch(0.11 0.003 240);
   --popover: oklch(0.98 0.003 240);
   --popover-foreground: oklch(0.11 0.003 240);
-  --primary: oklch(0.55 0.18 140);
+  --primary: oklch(0.74 0.15 350);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.90 0.008 240);
   --secondary-foreground: oklch(0.11 0.003 240);
@@ -107,7 +107,7 @@
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.85 0.008 240);
   --input: oklch(0.85 0.008 240);
-  --ring: oklch(0.55 0.18 140);
+  --ring: oklch(0.74 0.15 350);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -115,12 +115,12 @@
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(0.98 0.003 240);
   --sidebar-foreground: oklch(0.11 0.003 240);
-  --sidebar-primary: oklch(0.55 0.18 140);
+  --sidebar-primary: oklch(0.74 0.15 350);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.90 0.008 240);
   --sidebar-accent-foreground: oklch(0.11 0.003 240);
   --sidebar-border: oklch(0.85 0.008 240);
-  --sidebar-ring: oklch(0.55 0.18 140);
+  --sidebar-ring: oklch(0.74 0.15 350);
 }
 
 .dark {
@@ -130,7 +130,7 @@
   --card-foreground: oklch(0.92 0.005 240);
   --popover: oklch(0.16 0.004 240);
   --popover-foreground: oklch(0.92 0.005 240);
-  --primary: oklch(0.75 0.20 140);
+  --primary: oklch(0.74 0.15 350);
   --primary-foreground: oklch(0.11 0.003 240);
   --secondary: oklch(0.22 0.006 240);
   --secondary-foreground: oklch(0.92 0.005 240);
@@ -142,7 +142,7 @@
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.22 0.006 240);
   --input: oklch(0.22 0.006 240);
-  --ring: oklch(0.75 0.20 140);
+  --ring: oklch(0.74 0.15 350);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -150,12 +150,12 @@
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.16 0.004 240);
   --sidebar-foreground: oklch(0.92 0.005 240);
-  --sidebar-primary: oklch(0.75 0.20 140);
+  --sidebar-primary: oklch(0.74 0.15 350);
   --sidebar-primary-foreground: oklch(0.11 0.003 240);
   --sidebar-accent: oklch(0.22 0.006 240);
   --sidebar-accent-foreground: oklch(0.92 0.005 240);
   --sidebar-border: oklch(0.22 0.006 240);
-  --sidebar-ring: oklch(0.75 0.20 140);
+  --sidebar-ring: oklch(0.74 0.15 350);
 }
 
 @layer base {
@@ -194,35 +194,35 @@
 }
 
 .glow-emerald {
-  box-shadow: 0 0 20px rgba(74, 222, 128, 0.18) !important;
+  box-shadow: 0 0 20px rgba(244, 114, 182, 0.25) !important;
 }
 
 .glow-gold {
-  box-shadow: 0 0 20px rgba(251, 191, 36, 0.18) !important;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.25) !important;
 }
 
 .glow-emerald-sm {
-  box-shadow: 0 0 12px rgba(74, 222, 128, 0.1) !important;
+  box-shadow: 0 0 12px rgba(244, 114, 182, 0.15) !important;
 }
 
 .glow-gold-sm {
-  box-shadow: 0 0 12px rgba(251, 191, 36, 0.1) !important;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.15) !important;
 }
 
 .text-gold-gradient {
-  background: linear-gradient(135deg, #FFF9C4 0%, #FFD54F 50%, #FFB300 100%) !important;
+  background: linear-gradient(135deg, #FFE4E1 0%, #FFB6C1 50%, #FF69B4 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
 }
 
 .bg-gold-gradient {
-  background: linear-gradient(135deg, #b45309 0%, #d97706 45%, #fbbf24 100%) !important;
-  color: #0c0c0e !important;
+  background: linear-gradient(135deg, #fbcfe8 0%, #f472b6 50%, #db2777 100%) !important;
+  color: #ffffff !important;
 }
 
 .bg-emerald-gradient {
-  background: linear-gradient(135deg, #047857 0%, #10b981 100%) !important;
-  color: #0c0c0e !important;
+  background: linear-gradient(135deg, #fbcfe8 0%, #ec4899 100%) !important;
+  color: #ffffff !important;
 }
 
 /* Custom animation for ticket holographic shine */

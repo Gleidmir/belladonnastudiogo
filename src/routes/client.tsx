@@ -49,7 +49,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 export const Route = createFileRoute("/client")({
   head: () => ({
     meta: [
-      { title: "Painel do Cliente - Meu Barbeiro GO" },
+      { title: "Painel do Cliente - BellaDonna Studio GO" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -153,7 +153,7 @@ function ClientDashboard() {
           <div className="mx-auto max-w-lg px-4 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <BarberGoLogo className="w-8 h-8" />
-              <span className="text-sm font-extrabold tracking-tight">Meu Barbeiro GO</span>
+              <span className="text-sm font-extrabold tracking-tight">BellaDonna Studio GO</span>
             </div>
           </div>
         </header>
@@ -167,7 +167,7 @@ function ClientDashboard() {
             Estabelecimento Não Encontrado
           </h1>
           <p className="text-zinc-400 text-xs mt-3 max-w-xs leading-relaxed">
-            Esta barbearia não foi encontrada em nossa base de dados ou foi desativada pelo administrador.
+            Este salão de beleza não foi encontrado em nossa base de dados ou foi desativada pelo administrador.
           </p>
            <button
             onClick={handleClearSessionAndGoHome}
@@ -179,7 +179,7 @@ function ClientDashboard() {
 
         {/* Footer */}
         <footer className="py-4 text-center text-[10px] text-zinc-600 border-t border-zinc-900 bg-zinc-950">
-          Desenvolvido para Meu Barbeiro GO — Todos os direitos reservados.
+          Desenvolvido para BellaDonna Studio GO — Todos os direitos reservados.
         </footer>
       </div>
     );
@@ -202,7 +202,7 @@ function ClientDashboard() {
                 <BarberGoLogo className="w-8 h-8" />
               )}
               <span className="text-sm font-extrabold tracking-tight">
-                {shopProfile ? shopProfile.name : "Meu Barbeiro GO"}
+                {shopProfile ? shopProfile.name : "BellaDonna Studio GO"}
               </span>
             </div>
             <div className="flex items-center gap-2.5">
@@ -230,7 +230,7 @@ function ClientDashboard() {
             Agendamento Indisponível
           </h1>
           <p className="text-zinc-400 text-xs mt-3 max-w-xs leading-relaxed">
-            Esta barbearia está temporariamente indisponível para novos agendamentos online. Por favor, entre em contato diretamente com o estabelecimento para mais informações.
+            Este salão de beleza está temporariamente indisponível para novos agendamentos online. Por favor, entre em contato diretamente com o estabelecimento para mais informações.
           </p>
           <a
             href={`https://wa.me/${DEFAULT_ADMIN_PHONE}`}
@@ -244,7 +244,7 @@ function ClientDashboard() {
 
         {/* Footer */}
         <footer className="py-4 text-center text-[10px] text-zinc-600 border-t border-zinc-900 bg-zinc-950">
-          Desenvolvido para Meu Barbeiro GO — Todos os direitos reservados.
+          Desenvolvido para BellaDonna Studio GO — Todos os direitos reservados.
         </footer>
       </div>
     );
@@ -267,7 +267,7 @@ function ClientDashboard() {
             )}
             <span className="text-sm font-extrabold tracking-tight">
               {shopProfile ? shopProfile.name : (
-                <>Meu Barbeiro <span className="text-amber-500">GO</span></>
+                <>BellaDonna Studio <span className="text-amber-500">GO</span></>
               )}
             </span>
           </div>
@@ -330,13 +330,13 @@ function ClientDashboard() {
 
       {/* Footer */}
       <footer className="py-4 text-center text-[10px] text-zinc-600 border-t border-zinc-900 bg-zinc-950">
-        Desenvolvido para Meu Barbeiro GO — Todos os direitos reservados.
+        Desenvolvido para BellaDonna Studio GO — Todos os direitos reservados.
       </footer>
     </div>
   );
 }
 
-// Circular logo component for rendering either custom barbearia logo or Goiás themed default logo
+// Circular logo component for rendering either custom logo or default logo
 function ShopCircleLogo({ profile, className = "w-12 h-12" }: { profile: BarberShopProfile | null; className?: string }) {
   if (profile?.logoUrl) {
     return (
@@ -745,7 +745,7 @@ function BookingFlow({ clientPhone, clientName, shopProfile, onSessionUpdate, on
                   className="w-14 h-14 rounded-full object-cover mb-2 border-2 border-zinc-800 shadow"
                 />
                 <span className="text-xs font-black tracking-wider uppercase">{barber.name}</span>
-                <span className="text-[10px] opacity-65 mt-1 font-bold">Barbeiro</span>
+                <span className="text-[10px] opacity-65 mt-1 font-bold">Profissional</span>
               </button>
             ))}
           </div>
@@ -850,8 +850,8 @@ function BookingFlow({ clientPhone, clientName, shopProfile, onSessionUpdate, on
                   : allTimeSlots;
 
                 const activeSlots = barberHours.filter((time) => {
-                  const barberStart = selectedBarber?.startTime || "08:00";
-                  const barberEnd = selectedBarber?.endTime || "19:00";
+                  const barberStart = selectedBarber?.startTime || "06:00";
+                  const barberEnd = selectedBarber?.endTime || "22:00";
                   
                   const isWithinShift = time >= barberStart && time <= barberEnd;
                   
@@ -864,7 +864,7 @@ function BookingFlow({ clientPhone, clientName, shopProfile, onSessionUpdate, on
                 if (activeSlots.length === 0) {
                   return (
                     <p className="text-center text-xs text-zinc-500 col-span-5 py-4 font-semibold">
-                      Sem horários disponíveis para o turno deste barbeiro neste dia.
+                      Sem horários disponíveis para o turno desta profissional neste dia.
                     </p>
                   );
                 }
@@ -932,28 +932,14 @@ function BookingFlow({ clientPhone, clientName, shopProfile, onSessionUpdate, on
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Barbeiro</p>
+            <div className="flex gap-3">
+              <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-3 flex-1">
+                <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Profissional</p>
                 <p className="font-bold text-white mt-0.5">{selectedBarber.name}</p>
               </div>
-              <div>
+              <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-3 flex-1">
                 <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Duração</p>
                 <p className="font-bold text-white mt-0.5">{formatDuration(selectedService.duration)}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Data</p>
-                <p className="font-bold text-white mt-0.5">
-                  {new Date(selectedDate + "T12:00:00").toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Horário</p>
-                <p className="font-bold text-amber-400 mt-0.5">{selectedTime}</p>
               </div>
             </div>
 
@@ -1012,9 +998,9 @@ function BookingFlow({ clientPhone, clientName, shopProfile, onSessionUpdate, on
             <CheckCircle2 className="h-8 w-8" />
           </div>
           
-          <h2 className="text-lg font-extrabold text-white">Agendamento Confirmado!</h2>
-          <p className="text-zinc-400 text-xs mt-1.5 px-4">
-            Seu horário foi agendado e enviado para a barbearia. Te esperamos lá!
+          <h2 className="text-lg font-extrabold text-white mt-4">Agendamento Realizado!</h2>
+          <p className="text-zinc-400 text-xs mt-2 max-w-xs mx-auto leading-relaxed">
+            Seu horário foi agendado e enviado para o salão. Te esperamos lá!
           </p>
 
           <div className="bg-zinc-900/60 border border-amber-500/20 rounded-3xl p-5 my-6 text-left relative overflow-hidden holo-card glow-gold shadow-2xl">
@@ -1027,36 +1013,12 @@ function BookingFlow({ clientPhone, clientName, shopProfile, onSessionUpdate, on
             <div className="absolute -right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-zinc-950 border-l border-zinc-900" />
             
             <div className="text-center pb-5 border-b border-dashed border-zinc-800/80">
-              <span className="text-[10px] text-amber-400 uppercase tracking-widest font-black flex items-center justify-center gap-1.5 animate-pulse">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-                Comprovante de Reserva VIP
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-              </span>
-              <p className="text-2xl font-mono text-white font-extrabold mt-2 tracking-wide glow-gold-sm">{selectedTime}</p>
-              <p className="text-xs text-zinc-400 font-medium">
-                {new Date(selectedDate + "T12:00:00").toLocaleDateString("pt-BR", {
-                  weekday: "long",
-                  day: "2-digit",
-                  month: "2-digit",
-                })}
-              </p>
+              <span className="text-white font-extrabold uppercase">{shopProfile?.name || "BellaDonna Studio GO"}</span>
             </div>
-
-            <div className="space-y-3 pt-5 text-xs font-mono text-zinc-300">
-              <div className="flex justify-between">
-                <span className="text-zinc-500">ESTABELECIMENTO:</span>
-                <span className="text-white font-extrabold uppercase">{shopProfile?.name || "Meu Barbeiro GO"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-500">SERVIÇO:</span>
-                <span className="text-white font-extrabold">{selectedService.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-500">VALOR:</span>
-                <span className="text-amber-400 font-extrabold">{formatPrice(selectedService.price)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-500">PROFISSIONAL:</span>
+            
+            <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-2xl p-4 space-y-3.5 text-xs text-left">
+              <div className="flex justify-between items-center py-1">
+                <span className="text-zinc-500 font-medium">Profissional</span>
                 <span className="text-white font-extrabold">{selectedBarber.name}</span>
               </div>
               <div className="flex justify-between">
@@ -1073,7 +1035,7 @@ function BookingFlow({ clientPhone, clientName, shopProfile, onSessionUpdate, on
             className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white py-3.5 text-xs font-bold transition-all shadow-lg flex items-center justify-center gap-2 mb-3 active:scale-[0.98]"
           >
             <WhatsAppIcon className="w-5 h-5" />
-            Notificar Barbeiro no WhatsApp
+            Notificar Profissional no WhatsApp
           </a>
 
           <button

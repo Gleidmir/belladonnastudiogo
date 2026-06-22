@@ -215,27 +215,23 @@ const mapBarberFromDB = (b: any): Barber => {
 
 // Default data
 const defaultBarbers: Barber[] = [
-  { id: "b1", name: "PASTOR", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "08:00", endTime: "19:00", blockedDates: [], workHours: DEFAULT_WORK_HOURS },
-  { id: "b2", name: "RAFAEL", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "08:00", endTime: "19:00", blockedDates: [], workHours: DEFAULT_WORK_HOURS },
-  { id: "b3", name: "ANDRÉ", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "08:00", endTime: "19:00", blockedDates: [], workHours: DEFAULT_WORK_HOURS },
-  { id: "b4", name: "BRUNO", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "08:00", endTime: "19:00", blockedDates: [], workHours: DEFAULT_WORK_HOURS },
+  { id: "b1", name: "GISELLY", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "06:00", endTime: "22:00", blockedDates: [], workHours: DEFAULT_WORK_HOURS },
+  { id: "b2", name: "ALINE", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "06:00", endTime: "22:00", blockedDates: [], workHours: DEFAULT_WORK_HOURS },
+  { id: "b3", name: "JULIANA", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "06:00", endTime: "22:00", blockedDates: [], workHours: DEFAULT_WORK_HOURS },
+  { id: "b4", name: "CAROL", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face", phone: "5562993299120", workDays: [1, 2, 3, 4, 5, 6], startTime: "06:00", endTime: "22:00", blockedDates: [], workHours: DEFAULT_WORK_HOURS },
 ];
 
 const defaultServices: Service[] = [
-  { id: "s1", name: "Cabelo + Barba e Sobrancelha", price: 80, duration: 60, isActive: true },
-  { id: "s2", name: "Corte + Cavanhaque + Sobrancelha", price: 60, duration: 60, isActive: true },
-  { id: "s3", name: "Depilação a Cera / Nariz e Orelhas", price: 10, duration: 10, isActive: true },
-  { id: "s4", name: "Luzes", price: 100, duration: 60, isActive: true },
-  { id: "s5", name: "Pezinho", price: 10, duration: 15, isActive: true },
-  { id: "s6", name: "Pigmentação", price: 30, duration: 50, isActive: true },
-  { id: "s7", name: "Platinado", price: 120, duration: 60, isActive: true },
-  { id: "s8", name: "Sobrancelha", price: 10, duration: 10, isActive: true },
-  { id: "s9", name: "Barba", price: 35, duration: 30, isActive: true },
-  { id: "s10", name: "Barba + Pezinho + Sobrancelha", price: 50, duration: 40, isActive: true },
-  { id: "s11", name: "Cabelo", price: 35, duration: 30, isActive: true },
-  { id: "s12", name: "Cabelo + Barba", price: 70, duration: 50, isActive: true },
-  { id: "s13", name: "Cabelo + Bigode + Sobrancelha", price: 50, duration: 50, isActive: true },
-  { id: "s14", name: "Cabelo + Pigmentação", price: 70, duration: 50, isActive: true },
+  { id: "s1", name: "Manicure (Mão)", price: 30, duration: 30, isActive: true },
+  { id: "s2", name: "Pedicure (Pé)", price: 35, duration: 45, isActive: true },
+  { id: "s3", name: "Mão + Pé (Casadinha)", price: 60, duration: 75, isActive: true },
+  { id: "s4", name: "Design de Sobrancelhas", price: 25, duration: 20, isActive: true },
+  { id: "s5", name: "Corte Feminino", price: 70, duration: 40, isActive: true },
+  { id: "s6", name: "Escova + Lavado", price: 45, duration: 30, isActive: true },
+  { id: "s7", name: "Alongamento de Cílios", price: 120, duration: 90, isActive: true },
+  { id: "s8", name: "Progressiva", price: 180, duration: 120, isActive: true },
+  { id: "s9", name: "Hidratação Capilar", price: 50, duration: 45, isActive: true },
+  { id: "s10", name: "Maquiagem Profissional", price: 100, duration: 60, isActive: true },
 ];
 
 const defaultClients: Client[] = [];

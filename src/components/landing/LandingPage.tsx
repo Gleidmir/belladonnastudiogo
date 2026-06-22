@@ -89,12 +89,12 @@ function AdminPanel() {
         </div>
 
         <div className="rounded-xl bg-zinc-950/60 p-5 ring-1 ring-zinc-800">
-          <p className="text-sm font-semibold text-white">Comissão por barbeiro</p>
+          <p className="text-sm font-semibold text-white">Comissão por profissional</p>
           <div className="mt-4 space-y-3">
             {[
-              { n: "Rafael", v: 1240, p: 92 },
-              { n: "André", v: 980, p: 74 },
-              { n: "Bruno", v: 720, p: 54 },
+              { n: "Giselly", v: 1240, p: 92 },
+              { n: "Aline", v: 980, p: 74 },
+              { n: "Carol", v: 720, p: 54 },
             ].map((b) => (
               <div key={b.n}>
                 <div className="flex items-center justify-between text-xs">
@@ -125,15 +125,15 @@ function ClientApp() {
             <div className="flex justify-center pb-2">
               <div className="h-4 w-20 rounded-full bg-zinc-800" />
             </div>
-            <p className="text-[10px] uppercase tracking-widest text-zinc-500">Meu Barbeiro GO</p>
+            <p className="text-[10px] uppercase tracking-widest text-zinc-500">BellaDonna Studio GO</p>
             <p className="mt-1 text-lg font-extrabold text-white">Agende em 3 toques</p>
 
             <p className="mt-5 text-[11px] font-semibold text-zinc-400">1. Profissional</p>
             <div className="mt-2 flex gap-2 overflow-hidden">
               {[
-                { n: "Rafael", a: "R", on: true },
-                { n: "André", a: "A", on: false },
-                { n: "Bruno", a: "B", on: false },
+                { n: "Giselly", a: "G", on: true },
+                { n: "Aline", a: "A", on: false },
+                { n: "Carol", a: "C", on: false },
               ].map((b) => (
                 <div
                   key={b.n}
@@ -156,9 +156,9 @@ function ClientApp() {
             <p className="mt-4 text-[11px] font-semibold text-zinc-400">2. Serviço</p>
             <div className="mt-2 space-y-1.5">
               {[
-                { n: "Corte + Barba", t: "45 min", v: "R$ 70", on: true },
-                { n: "Corte", t: "30 min", v: "R$ 45", on: false },
-                { n: "Barba", t: "20 min", v: "R$ 30", on: false },
+                { n: "Mão + Pé (Casadinha)", t: "75 min", v: "R$ 60", on: true },
+                { n: "Manicure (Mão)", t: "30 min", v: "R$ 30", on: false },
+                { n: "Design de Sobrancelha", t: "20 min", v: "R$ 25", on: false },
               ].map((s) => (
                 <div
                   key={s.n}
@@ -209,8 +209,8 @@ function PreviewTabs() {
     <div>
       <div className="flex flex-col sm:flex-row gap-2 rounded-2xl bg-zinc-900/60 p-2 ring-1 ring-zinc-800 max-w-2xl mx-auto">
         {[
-          { id: "admin" as const, label: "Painel do Administrador (Meu Barbeiro GO)" },
-          { id: "client" as const, label: "App do Cliente (Meu Barbeiro GO)" },
+          { id: "admin" as const, label: "Painel do Administrador (BellaDonna Studio GO)" },
+          { id: "client" as const, label: "App do Cliente (BellaDonna Studio GO)" },
         ].map((t) => (
           <button
             key={t.id}
@@ -266,7 +266,7 @@ function SignupCard() {
           options: {
             data: {
               role: "admin",
-              name: "Barbeiro Administrador",
+              name: "Salão Administrador",
             }
           }
         });
@@ -290,7 +290,7 @@ function SignupCard() {
       // Local fallback: log in directly using the newly registered email as the tenant ID!
       setCurrentUser({
         role: "admin",
-        name: "Barbeiro Administrador",
+        name: "Salão Administrador",
         email: email,
       });
       toast.success("Cadastro de teste efetuado e conectado com sucesso!");
@@ -310,7 +310,7 @@ function SignupCard() {
           Acesso Antecipado
         </p>
       </div>
-      <p className="mt-2 text-lg font-bold text-white">Cadastre sua barbearia</p>
+      <p className="mt-2 text-lg font-bold text-white">Cadastre seu salão de beleza</p>
 
       <div className="mt-5 space-y-3">
         <div>
@@ -322,7 +322,7 @@ function SignupCard() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="voce@suabarbearia.com"
+              placeholder="voce@seusalao.com"
               className="w-full rounded-lg bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all"
             />
             {emailValid && (
@@ -399,7 +399,7 @@ export function LandingPage() {
           >
             <BarberGoLogo className="w-6 h-6 sm:w-8 h-8 shrink-0 animate-pulse" />
             <span className="text-[10px] xs:text-xs sm:text-base md:text-lg font-extrabold tracking-tight whitespace-nowrap truncate">
-              Meu Barbeiro <span className="text-amber-500">GO</span>
+              BellaDonna Studio <span className="text-amber-500">GO</span>
             </span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
@@ -427,25 +427,25 @@ export function LandingPage() {
           </div>
         </div>
       </header>
-
+      
       {!showPlans ? (
         <section id="hero" className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(245,158,11,0.08),transparent_50%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(244,114,182,0.08),transparent_50%)]" />
           <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
             <div className="flex flex-col items-center text-center">
               {/* Logo circular e Nome do App em letras maiúsculas */}
               <div className="flex flex-col items-center justify-center mb-6">
-                <div className="relative p-2.5 rounded-full bg-zinc-950/40 ring-1 ring-zinc-800/80 shadow-2xl drop-shadow-[0_0_25px_rgba(74,222,128,0.2)]">
+                <div className="relative p-2.5 rounded-full bg-zinc-950/40 ring-1 ring-zinc-800/80 shadow-2xl drop-shadow-[0_0_25px_rgba(244,114,182,0.2)]">
                   <BarberGoLogo className="w-32 h-32 md:w-36 md:h-36" animate={false} />
                 </div>
                 <h2 className="mt-5 text-3xl sm:text-4xl md:text-5xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400">
-                  MEU BARBEIRO GO
+                  BELLADONNA STUDIO GO
                 </h2>
               </div>
 
               {/* Apenas a frase solicitada pelo usuário */}
               <h1 className="text-xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-amber-400 mb-8">
-                Sua Barbearia no Piloto Automático
+                Seu Salão de Beleza no Piloto Automático
               </h1>
 
               <div className="mt-8 w-full max-w-md">
@@ -460,7 +460,7 @@ export function LandingPage() {
             <div className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="text-xs font-bold text-amber-500 uppercase tracking-widest">Planos de Assinatura</h2>
               <p className="mt-3 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-                Escolha o melhor plano para a sua barbearia
+                Escolha o melhor plano para o seu salão de beleza
               </p>
               <p className="mt-4 text-base text-zinc-400">
                 Todas as assinaturas iniciam com o período de 30 dias de teste grátis automático a partir do seu cadastro na página inicial.
@@ -507,7 +507,7 @@ export function LandingPage() {
                       A ativação do plano é realizada enviando o comprovante via WhatsApp.
                     </p>
                     <a
-                      href={`https://wa.me/5562993299120?text=${encodeURIComponent(`Olá Gleidmir! Gostaria de adquirir o plano *${p.name}* (R$ ${p.price}) para minha barbearia.`)}`}
+                      href={`https://wa.me/5562993299120?text=${encodeURIComponent(`Olá Gleidmir! Gostaria de adquirir o plano *${p.name}* (R$ ${p.price}) para o meu salão BellaDonna.`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`w-full inline-flex items-center justify-center gap-1.5 rounded-xl py-3 text-xs font-bold transition-all cursor-pointer text-center ${
@@ -546,7 +546,7 @@ export function LandingPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-1.5 sm:gap-2.5">
               <BarberGoLogo className="w-6 h-6 sm:w-8 h-8" />
-              <span className="font-extrabold tracking-tight text-xs sm:text-base whitespace-nowrap">Meu Barbeiro <span className="text-amber-500">GO</span></span>
+              <span className="font-extrabold tracking-tight text-xs sm:text-base whitespace-nowrap">BellaDonna Studio <span className="text-amber-500">GO</span></span>
               <span className="ml-3 hidden sm:inline text-xs text-zinc-500">
                 © {new Date().getFullYear()} — Todos os direitos reservados
               </span>

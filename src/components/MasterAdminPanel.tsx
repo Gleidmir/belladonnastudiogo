@@ -38,7 +38,7 @@ export function MasterAdminPanel() {
       setShops(data);
     } catch (e) {
       console.error(e);
-      toast.error("Erro ao carregar barbearias do servidor.");
+      toast.error("Erro ao carregar salões do servidor.");
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,7 @@ export function MasterAdminPanel() {
   };
 
   const handleSetVIP = async (shop: BarberShopProfile) => {
-    if (confirm(`Deseja definir a barbearia "${shop.name}" como VIP / Vitalícia?`)) {
+    if (confirm(`Deseja definir o salão "${shop.name}" como VIP / Vitalício?`)) {
       const success = await updateBarberShopSubscription(
         shop.tenantId,
         "master",
@@ -94,7 +94,7 @@ export function MasterAdminPanel() {
   };
 
   const handleExpireSubscription = async (shop: BarberShopProfile) => {
-    if (confirm(`Deseja desativar a licença da barbearia "${shop.name}" imediatamente?`)) {
+    if (confirm(`Deseja desativar a licença do salão "${shop.name}" imediatamente?`)) {
       const success = await updateBarberShopSubscription(
         shop.tenantId,
         shop.subscriptionPlan || "mensal",
@@ -108,7 +108,7 @@ export function MasterAdminPanel() {
   };
 
   const handleSetTrial = async (shop: BarberShopProfile) => {
-    if (confirm(`Deseja redefinir a barbearia "${shop.name}" para o modo Teste Grátis (Trial)?`)) {
+    if (confirm(`Deseja redefinir o salão "${shop.name}" para o modo Teste Grátis (Trial)?`)) {
       const success = await updateBarberShopSubscription(
         shop.tenantId,
         "mensal",
@@ -123,12 +123,12 @@ export function MasterAdminPanel() {
 
   const handleDeleteShop = async (shop: BarberShopProfile) => {
     const confirm1 = confirm(
-      `ATENÇÃO: Você está prestes a excluir permanentemente a barbearia "${shop.name}" (${shop.tenantId}).\n\nIsso apagará TODOS os dados no Supabase (Barbeiros, Serviços, Clientes, Agendamentos e Perfil) bem como o Usuário de Login correspondente.\n\nDeseja continuar?`
+      `ATENÇÃO: Você está prestes a excluir permanentemente o salão "${shop.name}" (${shop.tenantId}).\n\nIsso apagará TODOS os dados no Supabase (Profissionais, Serviços, Clientes, Agendamentos e Perfil) bem como o Usuário de Login correspondente.\n\nDeseja continuar?`
     );
     if (!confirm1) return;
 
     const confirm2 = confirm(
-      `CONFIRMAÇÃO FINAL:\n\nEsta ação é IRREVERSÍVEL. Você realmente deseja apagar tudo relacionado à barbearia "${shop.name}" de forma definitiva?`
+      `CONFIRMAÇÃO FINAL:\n\nEsta ação é IRREVERSÍVEL. Você realmente deseja apagar tudo relacionado ao salão "${shop.name}" de forma definitiva?`
     );
     if (confirm2) {
       setLoading(true);
@@ -163,11 +163,11 @@ export function MasterAdminPanel() {
           ? new Date(new Date(shop.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("pt-BR")
           : "N/A";
     
-    const message = `Olá! Passando para informar que sua licença do *Meu Barbeiro GO* foi ativada com sucesso! 🎉\n\n` +
-      `💈 *Barbearia:* ${shop.name}\n` +
+    const message = `Olá! Passando para informar que sua licença do *BellaDonna Studio GO* foi ativada com sucesso! 🎉\n\n` +
+      `💈 *Salão:* ${shop.name}\n` +
       `📦 *Plano:* ${planLabel.charAt(0).toUpperCase() + planLabel.slice(1)}\n` +
       `📅 *Validade:* ${expiryStr}\n\n` +
-      `Obrigado pela parceria e boas vendas! ✂️🚀`;
+      `Obrigado pela parceria e boas vendas! 🚀`;
 
     navigator.clipboard.writeText(message);
     toast.success("Mensagem de ativação copiada para área de transferência!");
@@ -255,7 +255,7 @@ export function MasterAdminPanel() {
             Painel do Administrador Master
           </h2>
           <p className="text-xs text-zinc-400">
-            Gerencie todas as barbearias cadastradas no sistema, controle licenças e envie notificações.
+            Gerencie todos os salões cadastrados no sistema, controle licenças e envie notificações.
           </p>
         </div>
         <button
@@ -335,7 +335,7 @@ export function MasterAdminPanel() {
             />
           </div>
           <span className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-wider">
-            Total: {filteredShops.length} Barbearias
+            Total: {filteredShops.length} Salões
           </span>
         </div>
 
@@ -346,7 +346,7 @@ export function MasterAdminPanel() {
           </div>
         ) : filteredShops.length === 0 ? (
           <div className="py-20 text-center text-zinc-500 text-xs border-2 border-dashed border-zinc-800 rounded-2xl">
-            Nenhuma barbearia cadastrada encontrada.
+            Nenhuma conta de salão cadastrada encontrada.
           </div>
         ) : (
           <div className="space-y-4">
@@ -482,7 +482,7 @@ export function MasterAdminPanel() {
                           onClick={() => handleDeleteShop(shop)}
                           className="w-full rounded-xl bg-red-600 hover:bg-red-500 text-white py-3 text-xs font-black transition-all cursor-pointer active:scale-95 text-center uppercase flex items-center justify-center gap-1.5"
                         >
-                          <Trash2 className="h-4 w-4 shrink-0" /> EXCLUIR BARBEARIA
+                          <Trash2 className="h-4 w-4 shrink-0" /> EXCLUIR SALÃO
                         </button>
                         <button
                           onClick={() => copyWhatsAppMessage(shop)}

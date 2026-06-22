@@ -105,7 +105,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Painel do Barbeiro - Meu Barbeiro GO" },
+      { title: "Painel do Salão - BellaDonna Studio GO" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -193,7 +193,7 @@ function AdminDashboard() {
         // Save session locally to support getCurrentUser() and getCurrentTenantId()
         setCurrentUser({
           role: "admin",
-          name: session.user?.user_metadata?.name || "Barbeiro Administrador",
+          name: session.user?.user_metadata?.name || "Salão Administrador",
           email: session.user?.email || "",
         });
         setSession(session.user);
@@ -388,7 +388,7 @@ function AdminDashboard() {
   const handleBarberSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!barberName.trim()) {
-      toast.error("Por favor, preencha o nome do barbeiro.");
+      toast.error("Por favor, preencha o nome da profissional.");
       return;
     }
 
@@ -447,7 +447,7 @@ function AdminDashboard() {
         setEditingBarber(null);
       } else {
         if (barbers.length >= 5) {
-          toast.error("Limite máximo de 5 barbeiros atingido! Se precisar de mais, entre em contato com o suporte.");
+          toast.error("Limite máximo de 5 profissionais atingido! Se precisar de mais, entre em contato com o suporte.");
           setLoading(false);
           return;
         }
@@ -467,8 +467,8 @@ function AdminDashboard() {
       setBarberAvatar("");
       setBarberPhone("");
       setBarberWorkDays([1, 2, 3, 4, 5, 6]);
-      setBarberStartTime("08:00");
-      setBarberEndTime("19:00");
+      setBarberStartTime("06:00");
+      setBarberEndTime("22:00");
       setBarberWorkHours(DEFAULT_WORK_HOURS);
       setBarberBlockedDates("");
       setShowBarberForm(false);
@@ -485,15 +485,15 @@ function AdminDashboard() {
     setBarberAvatar(barber.avatar);
     setBarberPhone(barber.phone || "");
     setBarberWorkDays(barber.workDays || [1, 2, 3, 4, 5, 6]);
-    setBarberStartTime(barber.startTime || "08:00");
-    setBarberEndTime(barber.endTime || "19:00");
+    setBarberStartTime(barber.startTime || "06:00");
+    setBarberEndTime(barber.endTime || "22:00");
     setBarberWorkHours(barber.workHours || DEFAULT_WORK_HOURS);
     setBarberBlockedDates((barber.blockedDates || []).join(", "));
     setShowBarberForm(true);
   };
 
   const handleDeleteBarberClick = async (id: string) => {
-    if (confirm("Tem certeza que deseja remover este barbeiro?")) {
+    if (confirm("Tem certeza que deseja remover esta profissional?")) {
       setLoading(true);
       try {
         await deleteBarber(id);
@@ -589,7 +589,7 @@ function AdminDashboard() {
     }
     
     const dateStr = new Date(apt.date + "T12:00:00").toLocaleDateString("pt-BR");
-    const message = `Olá, ${apt.clientName}! Passando para lembrar do seu agendamento no Meu Barbeiro GO:\n\n` +
+    const message = `Olá, ${apt.clientName}! Passando para lembrar do seu agendamento no BellaDonna Studio GO:\n\n` +
       `💇 *Serviço:* ${apt.serviceName}\n` +
       `📅 *Data:* ${dateStr}\n` +
       `⏰ *Horário:* ${apt.time}\n` +
@@ -694,12 +694,10 @@ function AdminDashboard() {
         {/* Top Header */}
         <header className="border-b border-zinc-900 bg-zinc-950 sticky top-0 z-40 pt-[calc(28px+env(safe-area-inset-top,0px))] sm:pt-4 pb-3">
           <div className="mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6">
-            <div className="flex items-center gap-3 min-w-0">
-              <BarberGoLogo className="w-10 h-10 shrink-0 animate-pulse" />
-              <div className="min-w-0">
-                <span className="text-base font-extrabold tracking-tight block truncate">Meu Barbeiro <span className="text-amber-500">GO</span></span>
-                <span className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider block truncate">Conta Inativa</span>
-              </div>
+            <BarberGoLogo className="w-10 h-10 shrink-0 animate-pulse" />
+            <div className="min-w-0">
+              <span className="text-base font-extrabold tracking-tight block truncate">BellaDonna Studio <span className="text-amber-500">GO</span></span>
+              <span className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider block truncate">Conta Inativa</span>
             </div>
             <div className="flex items-center gap-2 sm:gap-4 shrink-0">
               <button
@@ -737,7 +735,7 @@ function AdminDashboard() {
             </p>
             <a
               href={`https://wa.me/5562993299120?text=${encodeURIComponent(
-                `Olá Gleidmir! Acabei de cadastrar minha barbearia no Meu Barbeiro GO com o e-mail: ${session?.email || session?.email || "default"}. Gostaria de solicitar a ativação dos meus 30 dias de teste grátis!`
+                `Olá Gleidmir! Acabei de cadastrar meu salão no BellaDonna Studio GO com o e-mail: ${session?.email || session?.email || "default"}. Gostaria de solicitar a ativação dos meus 30 dias de teste grátis!`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -756,7 +754,7 @@ function AdminDashboard() {
 
         {/* Footer */}
         <footer className="py-4 text-center text-[10px] text-zinc-600 border-t border-zinc-900 bg-zinc-950">
-          Painel de Gerenciamento Meu Barbeiro GO — Todos os direitos reservados.
+          Painel de Gerenciamento BellaDonna Studio GO — Todos os direitos reservados.
         </footer>
       </div>
     );
@@ -780,8 +778,8 @@ function AdminDashboard() {
           <div className="flex items-center gap-3 min-w-0">
             <BarberGoLogo className="w-10 h-10 shrink-0 animate-pulse" />
             <div className="min-w-0">
-              <span className="text-base font-extrabold tracking-tight block truncate">Meu Barbeiro <span className="text-amber-500">GO</span></span>
-              <span className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider block truncate">Painel do Barbeiro</span>
+              <span className="text-base font-extrabold tracking-tight block truncate">BellaDonna Studio <span className="text-amber-500">GO</span></span>
+              <span className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider block truncate">Painel do Salão</span>
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
@@ -862,8 +860,8 @@ function AdminDashboard() {
             { id: "agenda" as const, label: "Agenda / Agendamentos", icon: Calendar, badge: totalPendingAppointments.length },
             { id: "clientes" as const, label: "Clientes Cadastrados", icon: Users },
             { id: "servicos" as const, label: "Gerenciar Serviços", icon: Layers },
-            { id: "barbeiros" as const, label: "Gerenciar Barbeiros", icon: Scissors },
-            { id: "perfil" as const, label: "Minha Barbearia", icon: Store },
+            { id: "barbeiros" as const, label: "Gerenciar Profissionais", icon: Scissors },
+            { id: "perfil" as const, label: "Meu Salão", icon: Store },
             ...(session?.email === "gleidmircristino@hotmail.com"
               ? [{ id: "master" as const, label: "Adm Master", icon: UserCheck }]
               : []),
@@ -924,8 +922,8 @@ function AdminDashboard() {
                   <a
                     href={`https://wa.me/?text=${encodeURIComponent(
                       shopName
-                        ? `Olá! Agende seu horário na barbearia ${shopName} online pelo link: ${typeof window !== "undefined" ? window.location.origin : ""}/client?t=${session?.email || "default"}`
-                        : `Olá! Agende seu horário na nossa barbearia online pelo link: ${typeof window !== "undefined" ? window.location.origin : ""}/client?t=${session?.email || "default"}`
+                        ? `Olá! Agende seu horário no salão ${shopName} online pelo link: ${typeof window !== "undefined" ? window.location.origin : ""}/client?t=${session?.email || "default"}`
+                        : `Olá! Agende seu horário no nosso salão online pelo link: ${typeof window !== "undefined" ? window.location.origin : ""}/client?t=${session?.email || "default"}`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -990,7 +988,7 @@ function AdminDashboard() {
 
                   {/* Barber Performance Chart */}
                   <div className="glass-card rounded-2xl p-5 min-w-0 overflow-hidden hover:glow-gold-sm transition-all duration-300">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-4">Desempenho por Barbeiro (Faturamento)</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-4">Desempenho por Profissional (Faturamento)</h3>
                     <div className="h-64 min-w-0 overflow-hidden">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={stats.barberPerformance} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
@@ -1311,7 +1309,7 @@ function AdminDashboard() {
                           <td className="p-4 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <a
-                                href={`https://wa.me/55${client.phone}?text=Ol%C3%A1%20${encodeURIComponent(client.name)}!%20Tudo%20bem%3F%20Entramos%20em%20contato%20pela%20Barbearia.`}
+                                href={`https://wa.me/55${client.phone}?text=Olá%20${encodeURIComponent(client.name)}!%20Tudo%20bem%3F%20Entramos%20em%20contato%20pelo%20Salão.`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/30 bg-zinc-950 px-2.5 py-1.5 text-[10px] font-bold text-green-500 hover:text-green-400 hover:border-green-500/50 transition-all cursor-pointer"
@@ -1505,8 +1503,8 @@ function AdminDashboard() {
             <div className="space-y-4">
               <div className="flex justify-between items-center glass-card rounded-2xl p-4">
                 <div>
-                  <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">Gerenciador de Barbeiros</h2>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">Adicione, edite ou remova profissionais da sua barbearia.</p>
+                  <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">Gerenciador de Profissionais</h2>
+                  <p className="text-[11px] text-zinc-500 mt-0.5">Adicione, edite ou remova profissionais do seu salão de beleza.</p>
                 </div>
                 {!showBarberForm && (
                   <button
@@ -1516,15 +1514,15 @@ function AdminDashboard() {
                       setBarberAvatar("");
                       setBarberPhone("");
                       setBarberWorkDays([1, 2, 3, 4, 5, 6]);
-                      setBarberStartTime("08:00");
-                      setBarberEndTime("19:00");
+                      setBarberStartTime("06:00");
+                      setBarberEndTime("22:00");
                       setBarberWorkHours(DEFAULT_WORK_HOURS);
                       setBarberBlockedDates("");
                       setShowBarberForm(true);
                     }}
                     className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2.5 text-xs font-bold transition-all shadow shadow-amber-500/10"
                   >
-                    <Plus className="h-4 w-4" /> Novo Barbeiro
+                    <Plus className="h-4 w-4" /> Nova Profissional
                   </button>
                 )}
               </div>
@@ -1536,12 +1534,12 @@ function AdminDashboard() {
                   className="glass-card rounded-2xl p-5 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200"
                 >
                   <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                    {editingBarber ? "Editar Barbeiro" : "Cadastrar Novo Barbeiro"}
+                    {editingBarber ? "Editar Profissional" : "Cadastrar Nova Profissional"}
                   </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Nome do Barbeiro</label>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Nome da Profissional</label>
                       <input
                         type="text"
                         required
@@ -1694,8 +1692,8 @@ function AdminDashboard() {
                         setBarberAvatar("");
                         setBarberPhone("");
                         setBarberWorkDays([1, 2, 3, 4, 5, 6]);
-                        setBarberStartTime("08:00");
-                        setBarberEndTime("19:00");
+                        setBarberStartTime("06:00");
+                        setBarberEndTime("22:00");
                         setBarberWorkHours(DEFAULT_WORK_HOURS);
                         setBarberBlockedDates("");
                       }}
@@ -1707,7 +1705,7 @@ function AdminDashboard() {
                       type="submit"
                       className="rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 px-6 py-2.5 text-xs font-bold transition-all shadow"
                     >
-                      {editingBarber ? "Salvar Alterações" : "Adicionar Barbeiro"}
+                      {editingBarber ? "Salvar Alterações" : "Adicionar Profissional"}
                     </button>
                   </div>
                 </form>
@@ -1743,7 +1741,7 @@ function AdminDashboard() {
                         {/* Exibição da Escala/Horários */}
                         <div className="text-[10px] text-zinc-500 mt-1.5 space-y-0.5 font-medium">
                           <p>
-                            🕒 Turno: <span className="text-amber-500 font-semibold">{barber.startTime || "08:00"} - {barber.endTime || "19:00"}</span>
+                            🕒 Turno: <span className="text-amber-500 font-semibold">{barber.startTime || "06:00"} - {barber.endTime || "22:00"}</span>
                           </p>
                           <p>
                             📅 Dias: <span className="text-zinc-300 font-semibold">
@@ -1790,9 +1788,9 @@ function AdminDashboard() {
           {activeTab === "perfil" && (
             <div className="space-y-6 animate-fade-in text-left">
               <div className="space-y-1">
-                <h2 className="text-xl font-extrabold text-white">Minha Barbearia</h2>
+                <h2 className="text-xl font-extrabold text-white">Meu Salão</h2>
                 <p className="text-xs text-zinc-400">
-                  Personalize as informações de visualização da sua barbearia para seus clientes.
+                  Personalize as informações de visualização do seu salão para seus clientes.
                 </p>
               </div>
 
@@ -1803,7 +1801,7 @@ function AdminDashboard() {
                     onSubmit={async (e) => {
                       e.preventDefault();
                       if (!shopName.trim()) {
-                        toast.error("Por favor, preencha o nome da barbearia.");
+                        toast.error("Por favor, preencha o nome do salão.");
                         return;
                       }
                       setSavingProfile(true);
@@ -1828,13 +1826,13 @@ function AdminDashboard() {
                     className="space-y-4"
                   >
                     <div>
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nome da Barbearia</label>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nome do Salão</label>
                       <input
                         type="text"
                         required
                         value={shopName}
                         onChange={(e) => setShopName(e.target.value)}
-                        placeholder="Ex: El Pastor Barbearia"
+                        placeholder="Ex: BellaDonna Studio"
                         className="w-full rounded-xl bg-zinc-950/90 px-4 py-3.5 text-sm text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all mt-1.5"
                       />
                     </div>
@@ -1882,7 +1880,7 @@ function AdminDashboard() {
                         {shopLogoUrl.trim() ? (
                           <img
                             src={shopLogoUrl}
-                            alt="Logo Barbearia"
+                            alt="Logo Salão"
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               // Fallback inside image on load error
@@ -1895,9 +1893,9 @@ function AdminDashboard() {
                       </div>
                       <div className="text-center w-full">
                         <h3 className="text-xs font-black text-white truncate max-w-full">
-                          {shopName.trim() || "Minha Barbearia"}
+                          {shopName.trim() || "Meu Salão"}
                         </h3>
-                        <span className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider mt-0.5 block">Meu Barbeiro GO</span>
+                        <span className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider mt-0.5 block">BellaDonna Studio GO</span>
                       </div>
                     </div>
                   </div>
@@ -1920,7 +1918,7 @@ function AdminDashboard() {
 
       {/* Footer */}
       <footer className="py-4 text-center text-[10px] text-zinc-600 border-t border-zinc-900 bg-zinc-950">
-        Painel de Gerenciamento Meu Barbeiro GO — Todos os direitos reservados.
+        Painel de Gerenciamento BellaDonna Studio GO — Todos os direitos reservados.
       </footer>
 
       {/* Early Subscription Modal */}
@@ -1939,7 +1937,7 @@ function AdminDashboard() {
                 Planos de Assinatura
               </h2>
               <p className="text-zinc-400 text-xs mt-1">
-                Selecione um plano e realize o pagamento para prolongar o acesso da sua barbearia.
+                Selecione um plano e realize o pagamento para prolongar o acesso do seu salão de beleza.
               </p>
             </div>
 
@@ -1975,7 +1973,7 @@ function SubscriptionSection({
   const currentPlan = plans.find(p => p.id === selectedPlan)!;
 
   const getWhatsAppLink = () => {
-    const message = `Olá Gleidmir! Realizei o pagamento do plano *${currentPlan.name}* (R$ ${currentPlan.price}) para minha barbearia. Aqui está o comprovante!`;
+    const message = `Olá Gleidmir! Realizei o pagamento do plano *${currentPlan.name}* (R$ ${currentPlan.price}) para o meu salão BellaDonna. Aqui está o comprovante!`;
     return `https://wa.me/5562993299120?text=${encodeURIComponent(message)}`;
   };
 

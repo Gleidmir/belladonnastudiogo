@@ -4,26 +4,26 @@ import { LandingPage } from "@/components/landing/LandingPage";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Meu Barbeiro GO — Seu Corte, Sua Hora" },
+      { title: "BellaDonna Studio GO — Agendamento de Salão de Beleza" },
       {
         name: "description",
         content:
-          "Agende seu horário online em poucos cliques. Simples, rápido e no seu controle.",
+          "Agende seu horário no salão em poucos cliques. Simples, rápido e no seu controle.",
       },
-      { property: "og:title", content: "Meu Barbeiro GO — Seu Corte, Sua Hora" },
+      { property: "og:title", content: "BellaDonna Studio GO — Seu Atendimento, Sua Hora" },
       {
         property: "og:description",
         content:
-          "Elimine a espera. Agende seu corte de cabelo e barba em tempo real.",
+          "Agende seus serviços de manicure, pedicure, sobrancelha, cabelo e cílios em tempo real.",
       },
       { property: "og:type", content: "website" },
-      { name: "keywords", content: "barbearia, agendamento online, barbearia goiás, agendamento de barbeiro, cortar cabelo, fazer barba, barbearia go, meubarbeiro" },
+      { name: "keywords", content: "salão de beleza, agendamento online, manicure, pedicure, sobrancelha, alongamento de cilios, progressiva, escova, belladonna studio go" },
       { name: "robots", content: "index, follow" },
     ],
     links: [
       {
         rel: "canonical",
-        href: "https://meubarbeirogo.netlify.app/",
+        href: "https://belladonnastudiogo.netlify.app/",
       },
     ],
   }),

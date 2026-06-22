@@ -9,12 +9,12 @@ import { supabase, isSupabaseConfigured } from "../lib/supabase";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Entrar - Meu Barbeiro GO" },
-      { name: "description", content: "Acesse sua conta para agendar horários ou gerenciar atendimentos na barbearia." },
+      { title: "Entrar - BellaDonna Studio GO" },
+      { name: "description", content: "Acesse sua conta para agendar horários ou gerenciar atendimentos no salão." },
       { name: "robots", content: "index, follow" },
     ],
     links: [
-      { rel: "canonical", href: "https://meubarbeirogo.netlify.app/login" }
+      { rel: "canonical", href: "https://belladonnastudiogo.netlify.app/login" }
     ]
   }),
   component: LoginPage,
@@ -75,7 +75,7 @@ function LoginPage() {
         if (session && !isClientLink) {
           setCurrentUser({
             role: "admin",
-            name: session.user?.user_metadata?.name || "Barbeiro Administrador",
+            name: session.user?.user_metadata?.name || "Salão Administrador",
             email: session.user?.email || "",
           });
           navigate({ to: "/admin" });
@@ -155,7 +155,7 @@ function LoginPage() {
         // Save session locally to support getCurrentUser()
         setCurrentUser({
           role: "admin",
-          name: data.user?.user_metadata?.name || "Barbeiro Administrador",
+          name: data.user?.user_metadata?.name || "Salão Administrador",
           email: adminEmail,
         });
 
@@ -213,7 +213,7 @@ function LoginPage() {
             )}
             <h1 className="text-2xl font-extrabold tracking-tight">
               {shopProfile ? shopProfile.name : (
-                <>Meu Barbeiro <span className="text-amber-500">GO</span></>
+                <>BellaDonna Studio <span className="text-amber-500">GO</span></>
               )}
             </h1>
             <p className="text-zinc-500 text-xs mt-1 text-center">
@@ -225,7 +225,7 @@ function LoginPage() {
           {isAdminOverride ? (
             <div className="flex justify-center mb-6">
               <span className="rounded-xl bg-gold-gradient text-zinc-950 px-8 py-2.5 text-xs font-black uppercase shadow-md glow-gold-sm tracking-wider select-none">
-                BARBEIRO / ADM
+                PROFISSIONAL / ADM
               </span>
             </div>
           ) : (
@@ -248,7 +248,7 @@ function LoginPage() {
                     required
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
-                    placeholder="Ex: João da Silva"
+                    placeholder="Ex: Maria Silva"
                     className="w-full rounded-xl bg-zinc-950/90 pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all"
                   />
                 </div>
@@ -290,7 +290,7 @@ function LoginPage() {
                     required
                     value={adminEmail}
                     onChange={(e) => setAdminEmail(e.target.value)}
-                    placeholder="admin@barberboss.com"
+                    placeholder="admin@belladonna.com"
                     className="w-full rounded-xl bg-zinc-950/90 pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-zinc-600 ring-1 ring-zinc-800 focus:ring-2 focus:ring-[#fbbf24] focus:outline-none transition-all"
                   />
                 </div>
@@ -325,7 +325,7 @@ function LoginPage() {
 
       {/* Footer */}
       <footer className="py-6 text-center text-xs text-zinc-600 border-t border-zinc-900/60">
-        © {new Date().getFullYear()} Meu Barbeiro GO — Todos os direitos reservados.
+        © {new Date().getFullYear()} BellaDonna Studio GO — Todos os direitos reservados.
       </footer>
     </div>
   );
