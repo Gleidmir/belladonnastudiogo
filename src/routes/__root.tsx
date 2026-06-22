@@ -89,8 +89,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@belladonnastudiogo" },
       { name: "twitter:title", content: "BellaDonna Studio GO" },
       { name: "twitter:description", content: "BellaDonna Studio GO — Seu momento de beleza, do seu jeito. Agendamento online prático para pedicure, manicure, corte, sobrancelhas e muito mais." },
-      { property: "og:image", content: "https://belladonnastudiogo.netlify.app/og_image.png?v=5" },
-      { name: "twitter:image", content: "https://belladonnastudiogo.netlify.app/og_image.png?v=5" },
+      { property: "og:image", content: "https://belladonnastudiogo.netlify.app/og_image.png?v=6" },
+      { name: "twitter:image", content: "https://belladonnastudiogo.netlify.app/og_image.png?v=6" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
@@ -111,11 +111,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "icon",
         type: "image/png",
-        href: "/og_image.png?v=5",
+        href: "/og_image.png?v=6",
       },
       {
         rel: "apple-touch-icon",
-        href: "https://belladonnastudiogo.netlify.app/og_image.png?v=5",
+        href: "https://belladonnastudiogo.netlify.app/og_image.png?v=6",
       },
       {
         rel: "canonical",
@@ -129,7 +129,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "HairSalon",
           "name": "BellaDonna Studio GO",
-          "image": "https://belladonnastudiogo.netlify.app/og_image.png?v=5",
+          "image": "https://belladonnastudiogo.netlify.app/og_image.png?v=6",
           "url": "https://belladonnastudiogo.netlify.app",
           "telephone": "+5562999999999",
           "priceRange": "$$",
